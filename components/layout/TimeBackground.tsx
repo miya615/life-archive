@@ -20,8 +20,8 @@ const THEMES: Record<Period, {
   morning: {
     bg: "linear-gradient(150deg,#040d1c 0%,#081e36 40%,#0a2d44 70%,#071828 100%)",
     orbs: [
-      { color: "rgba(56,189,248,0.22)", style: { top: "-15%", left: "-8%",  width: "60vw", height: "60vw" } },
-      { color: "rgba(99,210,255,0.13)", style: { top: "35%",  right: "-12%", width: "50vw", height: "50vw" } },
+      { color: "rgba(56,189,248,0.22)",  style: { top: "-15%", left: "-8%",   width: "60vw", height: "60vw" } },
+      { color: "rgba(99,210,255,0.13)",  style: { top: "35%",  right: "-12%", width: "50vw", height: "50vw" } },
       { color: "rgba(147,231,253,0.09)", style: { bottom: "-8%", left: "30%", width: "40vw", height: "40vw" } },
     ],
     vars: {
@@ -34,9 +34,9 @@ const THEMES: Record<Period, {
   noon: {
     bg: "linear-gradient(150deg,#140c00 0%,#2a1800 40%,#3b2400 70%,#200f00 100%)",
     orbs: [
-      { color: "rgba(251,191,36,0.20)", style: { top: "-12%", right: "-6%",  width: "58vw", height: "58vw" } },
-      { color: "rgba(249,115,22,0.14)", style: { top: "38%",  left: "-10%",  width: "50vw", height: "50vw" } },
-      { color: "rgba(253,224,71,0.09)", style: { bottom: "-5%", right: "22%", width: "38vw", height: "38vw" } },
+      { color: "rgba(251,191,36,0.20)",  style: { top: "-12%", right: "-6%",  width: "58vw", height: "58vw" } },
+      { color: "rgba(249,115,22,0.14)",  style: { top: "38%",  left: "-10%",  width: "50vw", height: "50vw" } },
+      { color: "rgba(253,224,71,0.09)",  style: { bottom: "-5%", right: "22%", width: "38vw", height: "38vw" } },
     ],
     vars: {
       "--accent": "#fbbf24", "--accent-dark": "#f59e0b", "--accent-glow": "rgba(251,191,36,0.32)",
@@ -48,8 +48,8 @@ const THEMES: Record<Period, {
   evening: {
     bg: "linear-gradient(150deg,#150420 0%,#2a0818 40%,#3d1206 70%,#180828 100%)",
     orbs: [
-      { color: "rgba(244,63,94,0.22)",  style: { top: "-10%", right: "-8%",  width: "55vw", height: "55vw" } },
-      { color: "rgba(168,85,247,0.16)", style: { top: "32%",  left: "-12%",  width: "48vw", height: "48vw" } },
+      { color: "rgba(244,63,94,0.22)",   style: { top: "-10%", right: "-8%",  width: "55vw", height: "55vw" } },
+      { color: "rgba(168,85,247,0.16)",  style: { top: "32%",  left: "-12%",  width: "48vw", height: "48vw" } },
       { color: "rgba(251,113,133,0.11)", style: { bottom: "-8%", right: "18%", width: "42vw", height: "42vw" } },
     ],
     vars: {
@@ -75,23 +75,26 @@ const THEMES: Record<Period, {
   },
 };
 
-function Particles({ count = 32 }: { count?: number }) {
+/* Particles: only rendered on desktop, 0 on mobile for performance */
+function Particles({ isMobile }: { isMobile: boolean }) {
+  const count = isMobile ? 0 : 24;
   const items = useRef(
-    Array.from({ length: count }, (_, i) => ({
+    Array.from({ length: 24 }, (_, i) => ({
       id: i,
       x: Math.random() * 100, y: Math.random() * 100,
-      size: Math.random() * 2.2 + 0.6,
-      dur: Math.random() * 14 + 10,
+      size: Math.random() * 1.8 + 0.5,
+      dur: Math.random() * 14 + 12,
       delay: Math.random() * -18,
-      opacity: Math.random() * 0.45 + 0.12,
+      opacity: Math.random() * 0.35 + 0.10,
     }))
   );
+  if (count === 0) return null;
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
       {items.current.map((p) => (
         <motion.div key={p.id} className="absolute rounded-full bg-white"
           style={{ left: `${p.x}%`, top: `${p.y}%`, width: p.size, height: p.size, opacity: p.opacity }}
-          animate={{ y: [0, -28, 0], opacity: [p.opacity, p.opacity * 2, p.opacity] }}
+          animate={{ y: [0, -24, 0], opacity: [p.opacity, p.opacity * 1.8, p.opacity] }}
           transition={{ duration: p.dur, delay: p.delay, repeat: Infinity, ease: "easeInOut" }}
         />
       ))}
@@ -102,21 +105,33 @@ function Particles({ count = 32 }: { count?: number }) {
 export function TimeBackground() {
   const [period, setPeriod] = useState<Period>("night");
   const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener("resize", checkMobile, { passive: true });
+
     const update = () => {
       const p = getPeriod();
       setPeriod(p);
       const root = document.documentElement;
       Object.entries(THEMES[p].vars).forEach(([k, v]) => root.style.setProperty(k, v));
     };
-    update(); setMounted(true);
+    update();
+    setMounted(true);
     const id = setInterval(update, 60_000);
-    return () => clearInterval(id);
+    return () => {
+      clearInterval(id);
+      window.removeEventListener("resize", checkMobile);
+    };
   }, []);
 
   if (!mounted) return null;
   const theme = THEMES[period];
+
+  /* On mobile: show only 1 orb (the first, largest), no animation */
+  const displayOrbs = isMobile ? theme.orbs.slice(0, 1) : theme.orbs;
 
   return (
     <>
@@ -127,16 +142,33 @@ export function TimeBackground() {
           transition={{ duration: 3, ease: "easeInOut" }}
         />
       </AnimatePresence>
+
       <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
-        {theme.orbs.map((orb, i) => (
-          <motion.div key={`${period}-${i}`} className="absolute rounded-full blur-3xl"
-            style={{ background: `radial-gradient(circle, ${orb.color} 0%, transparent 68%)`, ...orb.style }}
-            animate={{ scale: [1, 1.1, 1], opacity: [0.75, 1, 0.75] }}
-            transition={{ duration: 9 + i * 3, delay: i * 2, repeat: Infinity, ease: "easeInOut" }}
-          />
+        {displayOrbs.map((orb, i) => (
+          isMobile ? (
+            /* Static orb on mobile — no animation for performance */
+            <div
+              key={`${period}-${i}`}
+              className="absolute rounded-full blur-3xl"
+              style={{
+                background: `radial-gradient(circle, ${orb.color} 0%, transparent 68%)`,
+                ...orb.style,
+                opacity: 0.85,
+              }}
+            />
+          ) : (
+            <motion.div
+              key={`${period}-${i}`}
+              className="absolute rounded-full blur-3xl"
+              style={{ background: `radial-gradient(circle, ${orb.color} 0%, transparent 68%)`, ...orb.style }}
+              animate={{ scale: [1, 1.08, 1], opacity: [0.75, 1, 0.75] }}
+              transition={{ duration: 10 + i * 3, delay: i * 2, repeat: Infinity, ease: "easeInOut" }}
+            />
+          )
         ))}
       </div>
-      <Particles />
+
+      <Particles isMobile={isMobile} />
     </>
   );
 }

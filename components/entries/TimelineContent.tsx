@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Plus, ArrowRight, Image as ImageIcon } from "lucide-react";
+import { Plus, ArrowRight } from "lucide-react";
 import { Entry, CATEGORY_ICONS } from "@/lib/types";
 
 const MONTHS_JP = ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"];
@@ -44,11 +44,11 @@ export function TimelineContent({ entries }: { entries: Entry[] }) {
           <p className="text-5xl mb-4">✦</p>
           <p className="text-base text-muted mb-6">まだ記録がありません</p>
           <Link href="/entries/new">
-            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-white text-sm font-semibold cursor-pointer"
-              style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-dark))", boxShadow: "0 4px 20px var(--accent-glow)" }}>
+            <div
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-white text-sm font-semibold cursor-pointer active:scale-95 transition-transform duration-100"
+              style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-dark))", boxShadow: "0 4px 20px var(--accent-glow)", touchAction: "manipulation" }}>
               <Plus className="w-4 h-4" /> 最初の記録を追加
-            </motion.div>
+            </div>
           </Link>
         </motion.div>
       ) : (
@@ -59,11 +59,11 @@ export function TimelineContent({ entries }: { entries: Entry[] }) {
               transition={{ delay: yi * 0.1, duration: 0.5 }}>
               {/* Year header */}
               <div className="flex items-center gap-5 mb-8">
-                <motion.div whileHover={{ scale: 1.06, rotate: 4 }}
-                  className="w-18 h-18 lg:w-20 lg:h-20 rounded-3xl flex items-center justify-center flex-shrink-0 shadow-2xl"
-                  style={{ width: 72, height: 72, background: "linear-gradient(135deg, var(--accent), var(--accent-dark))", boxShadow: "0 8px 32px var(--accent-glow)" }}>
-                  <span className="text-white text-lg font-bold">{year}</span>
-                </motion.div>
+                <div
+                  className="rounded-3xl flex items-center justify-center flex-shrink-0"
+                  style={{ width: 64, height: 64, background: "linear-gradient(135deg, var(--accent), var(--accent-dark))", boxShadow: "0 6px 24px var(--accent-glow)" }}>
+                  <span className="text-white text-base font-bold">{year}</span>
+                </div>
                 <div className="flex-1">
                   <div className="h-px" style={{ background: "linear-gradient(90deg, var(--accent), transparent)" }} />
                   <p className="text-xs text-muted mt-1.5">
@@ -93,8 +93,8 @@ export function TimelineContent({ entries }: { entries: Entry[] }) {
                           initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
                           transition={{ delay: yi*0.1 + mi*0.06 + ei*0.04 }}>
                           <Link href={`/entries/${entry.id}`}>
-                            <motion.div whileHover={{ scale: 1.02, y: -3 }} whileTap={{ scale: 0.97 }}
-                              className="glass overflow-hidden cursor-pointer flex h-full"
+                            <div
+                              className="glass overflow-hidden cursor-pointer flex h-full active:scale-[0.98] transition-transform duration-100"
                               style={{ boxShadow: "var(--card-shadow)", minHeight: 80 }}>
                               <div className="w-1.5 flex-shrink-0" style={{ background: "linear-gradient(to bottom, var(--accent), var(--accent-dark))" }} />
                               <div className="flex-1 p-4">
@@ -125,7 +125,7 @@ export function TimelineContent({ entries }: { entries: Entry[] }) {
                                   </div>
                                 </div>
                               </div>
-                            </motion.div>
+                            </div>
                           </Link>
                         </motion.div>
                       ))}

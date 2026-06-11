@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Plus, X, ArrowRight, Image as ImageIcon } from "lucide-react";
+import { Search, Plus, X, ArrowRight } from "lucide-react";
 import { Entry, Category, CATEGORIES, CATEGORY_ICONS } from "@/lib/types";
 
 function formatDate(dateStr: string) {
@@ -45,12 +45,12 @@ export function EntriesContent({ entries }: { entries: Entry[] }) {
           <p className="text-sm text-muted mt-1">{filtered.length}件の記録</p>
         </div>
         <Link href="/entries/new">
-          <motion.div whileHover={{ scale: 1.04, y: -2 }} whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-2 px-5 py-3 rounded-2xl text-white font-semibold text-sm cursor-pointer"
-            style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-dark))", boxShadow: "0 4px 20px var(--accent-glow)" }}>
+          <div
+            className="flex items-center gap-2 px-5 py-3 rounded-2xl text-white font-semibold text-sm cursor-pointer active:scale-95 transition-transform duration-100"
+            style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-dark))", boxShadow: "0 4px 20px var(--accent-glow)", touchAction: "manipulation" }}>
             <Plus className="w-4 h-4" strokeWidth={2.5} />
             <span className="hidden sm:inline">新しい記録</span>
-          </motion.div>
+          </div>
         </Link>
       </motion.div>
 
@@ -74,19 +74,18 @@ export function EntriesContent({ entries }: { entries: Entry[] }) {
       {/* Category filter */}
       <div className="flex gap-2.5 overflow-x-auto scrollbar-hide pb-1">
         {(["すべて", ...CATEGORIES] as const).map((cat, i) => (
-          <motion.button key={cat}
-            initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.03 }}
-            whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.94 }}
+          <button key={cat}
             onClick={() => setSelectedCategory(cat as Category | "すべて")}
-            className="flex-shrink-0 text-sm font-semibold px-4 py-2 rounded-full transition-all"
+            className="flex-shrink-0 text-sm font-semibold px-4 py-2.5 rounded-full transition-all active:scale-95 duration-100"
             style={{
+              touchAction: "manipulation",
               background: selectedCategory === cat ? "linear-gradient(135deg, var(--accent), var(--accent-dark))" : "var(--glass-bg)",
               color: selectedCategory === cat ? "white" : "var(--text-secondary)",
               border: "1px solid var(--glass-border)",
               boxShadow: selectedCategory === cat ? "0 2px 14px var(--accent-glow)" : "none",
             }}>
             {cat !== "すべて" ? `${CATEGORY_ICONS[cat as Category]} ` : "✦ "}{cat}
-          </motion.button>
+          </button>
         ))}
       </div>
 
@@ -103,16 +102,16 @@ export function EntriesContent({ entries }: { entries: Entry[] }) {
             {filtered.map((entry, i) => (
               <motion.div key={entry.id} custom={i} variants={CARD} initial="hidden" animate="visible" layout>
                 <Link href={`/entries/${entry.id}`}>
-                  <motion.div whileHover={{ scale: 1.02, y: -4 }} whileTap={{ scale: 0.97 }}
-                    className="glass overflow-hidden cursor-pointer h-full flex flex-col"
-                    style={{ boxShadow: "var(--card-shadow)", minHeight: 220 }}>
+                  <div
+                    className="glass overflow-hidden cursor-pointer h-full flex flex-col active:scale-[0.98] transition-transform duration-100"
+                    style={{ boxShadow: "var(--card-shadow)", minHeight: 200 }}>
                     {entry.image_url ? (
                       <div className="relative overflow-hidden" style={{ height: 160 }}>
                         <img src={entry.image_url} alt="" className="w-full h-full object-cover opacity-85" />
                         <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 45%, rgba(0,0,0,0.5))" }} />
                         <span className="absolute bottom-2 left-3 text-[10px] px-2 py-0.5 rounded-full text-white font-medium"
-                          style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)" }}>
-                          <ImageIcon className="inline w-2.5 h-2.5 mr-1" />{entry.category}
+                          style={{ background: "rgba(0,0,0,0.45)" }}>
+                          {entry.category}
                         </span>
                       </div>
                     ) : (
@@ -138,7 +137,7 @@ export function EntriesContent({ entries }: { entries: Entry[] }) {
                         </span>
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                 </Link>
               </motion.div>
             ))}
