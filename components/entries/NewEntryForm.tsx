@@ -4,11 +4,17 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Camera, X, Loader2, Check } from "lucide-react";
+import { ArrowLeft, Camera, X, Loader2, Check, ChevronDown, ChevronUp } from "lucide-react";
 import { Category, CATEGORIES, CATEGORY_ICONS } from "@/lib/types";
 
 const EMOTIONS = ["😊", "😢", "😤", "😌", "🤔", "🔥", "😴", "🥳"];
 const WEATHERS = ["☀️", "⛅", "🌧️", "❄️", "🌙", "🌈"];
+
+// Primary categories shown by default
+const PRIMARY_CATEGORIES: Category[] = ["思い出", "健康", "仕事", "学習", "お金"];
+const SECONDARY_CATEGORIES: Category[] = CATEGORIES.filter(
+  (c) => !PRIMARY_CATEGORIES.includes(c)
+);
 
 export function NewEntryForm({ editEntry }: {
   editEntry?: {
@@ -28,6 +34,11 @@ export function NewEntryForm({ editEntry }: {
   const [imagePreview, setImagePreview] = useState<string | null>(editEntry?.image_url ?? null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  // Auto-expand if the current category is in secondary list
+  const [showAllCats, setShowAllCats] = useState(
+    editEntry ? SECONDARY_CATEGORIES.includes(editEntry.category) : false
+  );
+  const [titleFocused, setTitleFocused] = useState(false);
 
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -67,6 +78,8 @@ export function NewEntryForm({ editEntry }: {
     }
   }
 
+  const visibleCats = showAllCats ? CATEGORIES : PRIMARY_CATEGORIES;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -77,9 +90,10 @@ export function NewEntryForm({ editEntry }: {
       {/* Header */}
       <div className="flex items-center gap-3 mb-6 lg:mb-8">
         <motion.button
-          whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.93 }}
+          whileTap={{ scale: 0.9 }}
           onClick={() => router.back()}
-          className="w-9 h-9 glass rounded-2xl flex items-center justify-center"
+          className="w-11 h-11 glass rounded-2xl flex items-center justify-center flex-shrink-0"
+          style={{ touchAction: "manipulation" }}
         >
           <ArrowLeft className="w-4 h-4 text-secondary" strokeWidth={2} />
         </motion.button>
@@ -90,115 +104,176 @@ export function NewEntryForm({ editEntry }: {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Date + emotion + weather row */}
+
+        {/* ── Title (main focus) ── */}
+        <div
+          className="glass p-5 lg:p-6 transition-all duration-200"
+          style={{
+            borderColor: titleFocused ? "var(--accent)" : undefined,
+            boxShadow: titleFocused ? "0 0 0 1px var(--accent), var(--card-shadow)" : undefined,
+          }}
+        >
+          <label className="block text-[10px] font-semibold text-muted mb-3 uppercase tracking-widest">
+            タイトル <span style={{ color: "var(--accent)" }}>*</span>
+          </label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            onFocus={() => setTitleFocused(true)}
+            onBlur={() => setTitleFocused(false)}
+            placeholder="今日はどんな一日でしたか？"
+            autoComplete="off"
+            className="w-full bg-transparent font-bold text-primary placeholder:text-muted placeholder:font-normal leading-snug"
+            style={{ fontSize: "clamp(20px, 5vw, 28px)" }}
+          />
+        </div>
+
+        {/* ── Date + emotion + weather ── */}
         <div className="glass p-4 space-y-4">
-          <div className="flex items-center gap-4 flex-wrap">
-            <div className="flex-1 min-w-[120px]">
+          <div className="flex items-start gap-4 flex-wrap">
+            <div className="flex-1 min-w-[110px]">
               <label className="block text-[10px] font-medium text-muted mb-1.5 uppercase tracking-wider">日付</label>
-              <input type="date" value={entryDate} onChange={(e) => setEntryDate(e.target.value)}
-                className="w-full bg-transparent text-sm font-medium text-primary" />
+              <input
+                type="date"
+                value={entryDate}
+                onChange={(e) => setEntryDate(e.target.value)}
+                className="w-full bg-transparent text-sm font-medium text-primary"
+              />
             </div>
             <div>
               <label className="block text-[10px] font-medium text-muted mb-1.5 uppercase tracking-wider">気分</label>
-              <div className="flex gap-1.5 flex-wrap">
+              <div className="flex gap-1 flex-wrap">
                 {EMOTIONS.map((em) => (
-                  <motion.button key={em} type="button" whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}
+                  <button
+                    key={em}
+                    type="button"
                     onClick={() => setEmotion(em)}
-                    className="text-lg rounded-xl p-1 transition-all"
-                    style={{ background: emotion === em ? "var(--glass-strong-bg)" : "transparent", opacity: emotion === em ? 1 : 0.45 }}
-                  >{em}</motion.button>
+                    className="text-xl rounded-xl p-1.5 transition-all"
+                    style={{
+                      background: emotion === em ? "var(--glass-strong-bg)" : "transparent",
+                      opacity: emotion === em ? 1 : 0.4,
+                      touchAction: "manipulation",
+                    }}
+                  >{em}</button>
                 ))}
               </div>
             </div>
             <div>
               <label className="block text-[10px] font-medium text-muted mb-1.5 uppercase tracking-wider">天気</label>
-              <div className="flex gap-1.5">
+              <div className="flex gap-1">
                 {WEATHERS.map((w) => (
-                  <motion.button key={w} type="button" whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}
+                  <button
+                    key={w}
+                    type="button"
                     onClick={() => setWeather(w)}
-                    className="text-lg rounded-xl p-1 transition-all"
-                    style={{ background: weather === w ? "var(--glass-strong-bg)" : "transparent", opacity: weather === w ? 1 : 0.45 }}
-                  >{w}</motion.button>
+                    className="text-xl rounded-xl p-1.5 transition-all"
+                    style={{
+                      background: weather === w ? "var(--glass-strong-bg)" : "transparent",
+                      opacity: weather === w ? 1 : 0.4,
+                      touchAction: "manipulation",
+                    }}
+                  >{w}</button>
                 ))}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Title */}
-        <div className="glass p-4">
-          <label className="block text-[10px] font-medium text-muted mb-2 uppercase tracking-wider">タイトル *</label>
-          <input
-            type="text" value={title} onChange={(e) => setTitle(e.target.value)}
-            placeholder="この記録のタイトル"
-            className="w-full bg-transparent text-base lg:text-lg font-semibold text-primary placeholder:text-muted placeholder:font-normal"
-          />
-        </div>
-
-        {/* Category */}
+        {/* ── Category (collapsible) ── */}
         <div className="glass p-4">
           <label className="block text-[10px] font-medium text-muted mb-3 uppercase tracking-wider">カテゴリ</label>
-          <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
-            {CATEGORIES.map((cat) => (
-              <motion.button
-                key={cat} type="button"
-                whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.94 }}
+
+          <div className="grid grid-cols-5 gap-2">
+            {visibleCats.map((cat) => (
+              <button
+                key={cat}
+                type="button"
                 onClick={() => setCategory(cat)}
-                className="flex flex-col items-center gap-1 p-2 rounded-2xl text-xs transition-all"
+                className="flex flex-col items-center gap-1 p-2.5 rounded-2xl text-xs transition-all active:scale-95"
                 style={{
-                  background: category === cat ? "linear-gradient(135deg, var(--accent), var(--accent-dark))" : "var(--glass-bg)",
+                  background: category === cat
+                    ? "linear-gradient(135deg, var(--accent), var(--accent-dark))"
+                    : "var(--glass-bg)",
                   color: category === cat ? "white" : "var(--text-secondary)",
                   boxShadow: category === cat ? "0 4px 16px var(--accent-glow)" : "none",
+                  border: "1px solid var(--glass-border)",
+                  touchAction: "manipulation",
                 }}
               >
-                <span className="text-lg">{CATEGORY_ICONS[cat]}</span>
+                <span className="text-xl">{CATEGORY_ICONS[cat]}</span>
                 <span className="text-[9px] font-medium leading-tight text-center">{cat}</span>
-              </motion.button>
+              </button>
             ))}
           </div>
+
+          <AnimatePresence>
+            {!showAllCats && SECONDARY_CATEGORIES.includes(category) && (
+              <motion.p
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="text-[11px] mt-3 pb-1"
+                style={{ color: "var(--accent)" }}
+              >
+                現在選択中: {CATEGORY_ICONS[category]} {category}
+              </motion.p>
+            )}
+          </AnimatePresence>
+
+          <button
+            type="button"
+            onClick={() => setShowAllCats((v) => !v)}
+            className="mt-3 flex items-center gap-1.5 text-[12px] font-medium transition-opacity active:opacity-60"
+            style={{ color: "var(--text-muted)", touchAction: "manipulation" }}
+          >
+            {showAllCats
+              ? <><ChevronUp className="w-3.5 h-3.5" /> 折りたたむ</>
+              : <><ChevronDown className="w-3.5 h-3.5" /> 他のカテゴリを見る（{SECONDARY_CATEGORIES.length}件）</>
+            }
+          </button>
         </div>
 
-        {/* Content */}
+        {/* ── Content ── */}
         <div className="glass p-4">
           <label className="block text-[10px] font-medium text-muted mb-2 uppercase tracking-wider">本文</label>
           <textarea
-            value={content} onChange={(e) => setContent(e.target.value)}
-            placeholder={`今日あったこと、感じたこと、気づいたこと...\n\nNotionのように自由に書いてください。`}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder={`今日あったこと、感じたこと、気づいたこと...\n\n自由に書いてください。`}
             rows={8}
             className="w-full bg-transparent text-sm text-primary placeholder:text-muted resize-none leading-relaxed"
           />
         </div>
 
-        {/* Image */}
+        {/* ── Image ── */}
         <div className="glass p-4">
           <label className="block text-[10px] font-medium text-muted mb-3 uppercase tracking-wider">写真</label>
           <AnimatePresence mode="wait">
             {imagePreview ? (
               <motion.div key="preview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative">
                 <img src={imagePreview} alt="" className="w-full h-56 object-cover rounded-2xl opacity-90" />
-                <motion.button
-                  whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
+                <button
                   type="button"
                   onClick={() => { setImageFile(null); setImagePreview(null); }}
-                  className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{ background: "rgba(0,0,0,0.6)" }}
+                  className="absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center active:scale-90 transition-transform"
+                  style={{ background: "rgba(0,0,0,0.6)", touchAction: "manipulation" }}
                 >
                   <X className="w-4 h-4 text-white" />
-                </motion.button>
+                </button>
               </motion.div>
             ) : (
-              <motion.label key="upload" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="block cursor-pointer">
-                <motion.div
-                  whileHover={{ scale: 1.01 }}
-                  className="border-2 border-dashed rounded-2xl h-36 flex flex-col items-center justify-center gap-2"
+              <label key="upload" className="block cursor-pointer">
+                <div
+                  className="border-2 border-dashed rounded-2xl h-36 flex flex-col items-center justify-center gap-2 active:opacity-70 transition-opacity"
                   style={{ borderColor: "var(--glass-border)" }}
                 >
                   <Camera className="w-6 h-6 text-muted" strokeWidth={1.5} />
                   <p className="text-xs text-muted">タップして写真を選択</p>
                   <p className="text-[10px] text-muted">JPG, PNG, HEIC対応</p>
-                </motion.div>
+                </div>
                 <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
-              </motion.label>
+              </label>
             )}
           </AnimatePresence>
         </div>
@@ -206,25 +281,32 @@ export function NewEntryForm({ editEntry }: {
         <AnimatePresence>
           {error && (
             <motion.p
-              initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
               className="text-xs px-4 py-3 rounded-2xl"
               style={{ background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.2)" }}
             >{error}</motion.p>
           )}
         </AnimatePresence>
 
-        {/* Submit */}
-        <motion.button
-          type="submit" disabled={loading}
-          whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-          className="w-full py-4 rounded-2xl text-white font-semibold text-sm disabled:opacity-60 flex items-center justify-center gap-2"
+        {/* ── Submit ── */}
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full py-4 rounded-2xl text-white font-semibold text-sm disabled:opacity-60 flex items-center justify-center gap-2 active:scale-98 transition-transform"
           style={{
             background: "linear-gradient(135deg, var(--accent), var(--accent-dark))",
             boxShadow: "0 4px 24px var(--accent-glow)",
+            touchAction: "manipulation",
           }}
         >
-          {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> 保存中...</> : <><Check className="w-4 h-4" /> {isEdit ? "変更を保存" : "記録を保存"}</>}
-        </motion.button>
+          {loading
+            ? <><Loader2 className="w-4 h-4 animate-spin" /> 保存中...</>
+            : <><Check className="w-4 h-4" /> {isEdit ? "変更を保存" : "記録を保存"}</>
+          }
+        </button>
+
       </form>
     </motion.div>
   );

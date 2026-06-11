@@ -113,6 +113,10 @@ body {
 
 /* ── Form resets ── */
 a, button { -webkit-tap-highlight-color: transparent; }
+/* Eliminate 300ms tap delay and double-tap-zoom on all interactive elements */
+a, button, [role="button"], input, textarea, select, label {
+  touch-action: manipulation;
+}
 input, textarea { color: var(--text-primary); outline: none; font-family: inherit; }
 input::placeholder, textarea::placeholder { color: var(--text-muted); }
 input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) opacity(0.4); }
