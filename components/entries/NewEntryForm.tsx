@@ -82,44 +82,47 @@ export function NewEntryForm({ editEntry }: { editEntry?: {
   }
 
   return (
-    <div className="py-8 animate-fade-up">
+    <div className="py-8 animate-fade-up relative z-10">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => router.back()} className="w-9 h-9 glass rounded-2xl flex items-center justify-center shadow-sm">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4 text-gray-600">
+        <button
+          onClick={() => router.back()}
+          className="w-9 h-9 glass rounded-2xl flex items-center justify-center shadow-lg shadow-black/20"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4 text-white/70">
             <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
           </svg>
         </button>
-        <h1 className="text-xl font-bold text-gray-800">{isEdit ? "記録を編集" : "新しい記録"}</h1>
+        <h1 className="text-xl font-bold text-primary">{isEdit ? "記録を編集" : "新しい記録"}</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Date */}
-        <div className="glass rounded-2xl p-4 shadow-sm">
-          <label className="block text-xs font-medium text-gray-500 mb-2">日付</label>
+        <div className="glass rounded-2xl p-4 shadow-lg shadow-black/20">
+          <label className="block text-xs font-medium text-muted mb-2">日付</label>
           <input
             type="date"
             value={entryDate}
             onChange={(e) => setEntryDate(e.target.value)}
-            className="w-full bg-transparent text-sm font-medium text-gray-800"
+            className="w-full bg-transparent text-sm font-medium text-primary"
           />
         </div>
 
         {/* Title */}
-        <div className="glass rounded-2xl p-4 shadow-sm">
-          <label className="block text-xs font-medium text-gray-500 mb-2">タイトル *</label>
+        <div className="glass rounded-2xl p-4 shadow-lg shadow-black/20">
+          <label className="block text-xs font-medium text-muted mb-2">タイトル *</label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="記録のタイトル"
-            className="w-full bg-transparent text-sm text-gray-800 placeholder-gray-400"
+            className="w-full bg-transparent text-sm text-primary placeholder:text-muted"
           />
         </div>
 
         {/* Category */}
-        <div className="glass rounded-2xl p-4 shadow-sm">
-          <label className="block text-xs font-medium text-gray-500 mb-3">カテゴリ</label>
+        <div className="glass rounded-2xl p-4 shadow-lg shadow-black/20">
+          <label className="block text-xs font-medium text-muted mb-3">カテゴリ</label>
           <div className="grid grid-cols-4 gap-2">
             {CATEGORIES.map((cat) => (
               <button
@@ -128,8 +131,8 @@ export function NewEntryForm({ editEntry }: { editEntry?: {
                 onClick={() => setCategory(cat)}
                 className={`flex flex-col items-center gap-1 p-2 rounded-2xl text-xs transition-all ${
                   category === cat
-                    ? "bg-indigo-500 text-white shadow-md shadow-indigo-200"
-                    : "bg-white/50 text-gray-600"
+                    ? "bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-600/30"
+                    : "bg-white/5 text-secondary hover:bg-white/10"
                 }`}
               >
                 <span className="text-lg">{CATEGORY_ICONS[cat]}</span>
@@ -140,27 +143,27 @@ export function NewEntryForm({ editEntry }: { editEntry?: {
         </div>
 
         {/* Content */}
-        <div className="glass rounded-2xl p-4 shadow-sm">
-          <label className="block text-xs font-medium text-gray-500 mb-2">本文</label>
+        <div className="glass rounded-2xl p-4 shadow-lg shadow-black/20">
+          <label className="block text-xs font-medium text-muted mb-2">本文</label>
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="今日あったこと、感じたこと、気づいたこと..."
             rows={5}
-            className="w-full bg-transparent text-sm text-gray-800 placeholder-gray-400 resize-none"
+            className="w-full bg-transparent text-sm text-primary placeholder:text-muted resize-none"
           />
         </div>
 
         {/* Image */}
-        <div className="glass rounded-2xl p-4 shadow-sm">
-          <label className="block text-xs font-medium text-gray-500 mb-3">写真</label>
+        <div className="glass rounded-2xl p-4 shadow-lg shadow-black/20">
+          <label className="block text-xs font-medium text-muted mb-3">写真</label>
           {imagePreview ? (
             <div className="relative">
-              <img src={imagePreview} alt="" className="w-full h-48 object-cover rounded-xl" />
+              <img src={imagePreview} alt="" className="w-full h-48 object-cover rounded-xl opacity-90" />
               <button
                 type="button"
                 onClick={() => { setImageFile(null); setImagePreview(null); }}
-                className="absolute top-2 right-2 w-7 h-7 bg-black/50 rounded-full flex items-center justify-center"
+                className="absolute top-2 right-2 w-7 h-7 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} className="w-4 h-4">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -169,9 +172,9 @@ export function NewEntryForm({ editEntry }: { editEntry?: {
             </div>
           ) : (
             <label className="block">
-              <div className="border-2 border-dashed border-gray-200 rounded-xl h-32 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-indigo-300 transition-colors">
+              <div className="border-2 border-dashed border-white/15 rounded-xl h-32 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-violet-500/40 transition-colors">
                 <span className="text-2xl">📷</span>
-                <span className="text-xs text-gray-400">タップして写真を選択</span>
+                <span className="text-xs text-muted">タップして写真を選択</span>
               </div>
               <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
             </label>
@@ -179,14 +182,14 @@ export function NewEntryForm({ editEntry }: { editEntry?: {
         </div>
 
         {error && (
-          <p className="text-xs text-red-500 bg-red-50 px-3 py-2 rounded-xl">{error}</p>
+          <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-2 rounded-xl">{error}</p>
         )}
 
         {/* Submit */}
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-semibold text-sm shadow-lg shadow-indigo-200 active:scale-95 transition-all disabled:opacity-60"
+          className="w-full py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-semibold text-sm shadow-xl shadow-violet-600/30 active:scale-95 transition-all disabled:opacity-60"
         >
           {loading ? "保存中..." : isEdit ? "変更を保存" : "記録を保存"}
         </button>

@@ -15,27 +15,68 @@ body {
 }
 
 body {
-  background: linear-gradient(135deg, #f0f4ff 0%, #faf0ff 50%, #fff0f8 100%);
+  background: linear-gradient(135deg, #0d0d1a 0%, #130d24 35%, #0d1a2e 70%, #1a0d24 100%);
   background-attachment: fixed;
   min-height: 100vh;
   min-height: 100dvh;
   font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP",
     -apple-system, BlinkMacSystemFont, sans-serif;
-  color: #1a1a2e;
+  color: #f0f0ff;
+}
+
+/* Ambient orbs */
+body::before {
+  content: "";
+  position: fixed;
+  top: -20%;
+  left: -10%;
+  width: 60vw;
+  height: 60vw;
+  background: radial-gradient(circle, rgba(120, 60, 220, 0.18) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+body::after {
+  content: "";
+  position: fixed;
+  bottom: -10%;
+  right: -10%;
+  width: 50vw;
+  height: 50vw;
+  background: radial-gradient(circle, rgba(30, 100, 200, 0.14) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .glass {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
 }
 
 .glass-nav {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-top: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(13, 13, 26, 0.75);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.text-primary {
+  color: #f0f0ff;
+}
+.text-secondary {
+  color: rgba(200, 200, 230, 0.7);
+}
+.text-muted {
+  color: rgba(180, 180, 210, 0.45);
 }
 
 .scrollbar-hide::-webkit-scrollbar {
@@ -53,7 +94,7 @@ body {
 @keyframes fadeUp {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -62,10 +103,24 @@ body {
 }
 
 .animate-fade-up {
-  animation: fadeUp 0.35s ease forwards;
+  animation: fadeUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
 a,
 button {
   -webkit-tap-highlight-color: transparent;
+}
+
+input,
+textarea {
+  color: #f0f0ff;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(180, 180, 210, 0.4);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) opacity(0.5);
 }

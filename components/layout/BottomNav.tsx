@@ -99,14 +99,14 @@ export function BottomNav() {
               href={item.href}
               className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-2xl transition-all duration-200 min-w-[60px] ${
                 active
-                  ? "text-indigo-600 bg-indigo-50"
-                  : "text-gray-400 hover:text-gray-600"
+                  ? "text-violet-300 bg-white/10"
+                  : "text-white/35 hover:text-white/60"
               }`}
             >
               {item.icon(active)}
               <span
                 className={`text-[10px] font-medium tracking-wide ${
-                  active ? "text-indigo-600" : "text-gray-400"
+                  active ? "text-violet-300" : "text-white/35"
                 }`}
               >
                 {item.label}
