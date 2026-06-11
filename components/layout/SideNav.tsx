@@ -6,15 +6,15 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Home, BookOpen, CalendarDays, User, Plus,
-  Feather, LogOut, BarChart3,
+  Feather, LogOut,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 const NAV = [
-  { href: "/",         label: "ホーム",     icon: Home },
-  { href: "/entries",  label: "記録一覧",   icon: BookOpen },
-  { href: "/timeline", label: "人生年表",   icon: CalendarDays },
-  { href: "/profile",  label: "マイページ", icon: User },
+  { href: "/",         label: "今日",  icon: Home },
+  { href: "/entries",  label: "記憶",  icon: BookOpen },
+  { href: "/timeline", label: "年表",  icon: CalendarDays },
+  { href: "/profile",  label: "自分",  icon: User },
 ];
 
 interface UserStats {
@@ -57,120 +57,91 @@ export function SideNav() {
   }
 
   return (
-    <aside className="glass-sidebar hidden lg:flex flex-col w-[270px] xl:w-[290px] flex-shrink-0 h-screen sticky top-0 z-40 overflow-y-auto">
+    <aside className="glass-sidebar hidden lg:flex flex-col flex-shrink-0 h-screen sticky top-0 z-40 overflow-y-auto"
+      style={{ width: 220 }}>
 
       {/* Logo */}
-      <div className="px-6 pt-7 pb-5">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0"
-            style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-dark))", boxShadow: "0 4px 16px var(--accent-glow)" }}>
-            <Feather className="w-4.5 h-4.5 text-white" style={{ width: 18, height: 18 }} strokeWidth={1.8} />
+      <div className="px-5 pt-7 pb-5">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+            style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-dark))", boxShadow: "0 4px 12px var(--accent-glow)" }}>
+            <Feather style={{ width: 14, height: 14 }} className="text-white" strokeWidth={1.8} />
           </div>
-          <div>
-            <p className="text-[15px] font-bold text-primary tracking-tight leading-none">Life Chronicle</p>
-            <p className="text-[11px] text-muted mt-0.5 font-normal">人生の第二の脳</p>
+          <div className="min-w-0">
+            <p className="text-[13px] font-bold text-primary truncate">Life Chronicle</p>
+            <p className="text-[10px] text-muted truncate">人生ノート</p>
           </div>
         </div>
       </div>
 
-      {/* Divider */}
-      <div className="mx-6 mb-4 h-px" style={{ background: "var(--glass-border)" }} />
+      <div className="mx-5 mb-3 h-px" style={{ background: "var(--glass-border)" }} />
 
       {/* Nav items */}
       <nav className="flex flex-col gap-0.5 px-3 flex-1">
-        <p className="text-[10px] font-medium text-muted uppercase tracking-widest px-3 mb-2">メニュー</p>
         {NAV.map((item) => {
           const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
           const Icon = item.icon;
           return (
             <Link key={item.href} href={item.href}>
               <motion.div
-                whileHover={{ x: 3 }}
                 whileTap={{ scale: 0.97 }}
-                className="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all cursor-pointer"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all cursor-pointer"
                 style={{
                   background: active ? "var(--glass-strong-bg)" : "transparent",
                   color: active ? "var(--accent)" : "var(--text-muted)",
-                  borderLeft: `3px solid ${active ? "var(--accent)" : "transparent"}`,
                 }}
               >
-                <Icon className="flex-shrink-0" style={{ width: 17, height: 17 }} strokeWidth={active ? 2.2 : 1.6} />
-                <span className="text-[14px] font-medium">{item.label}</span>
+                <Icon style={{ width: 16, height: 16 }} strokeWidth={active ? 2.2 : 1.6} className="flex-shrink-0" />
+                <span className="text-[13px] font-medium">{item.label}</span>
               </motion.div>
             </Link>
           );
         })}
       </nav>
 
-      {/* Quick add button */}
-      <div className="px-5 my-4">
+      {/* Quick add */}
+      <div className="px-4 my-4">
         <Link href="/entries/new">
           <motion.div
-            whileHover={{ scale: 1.02, y: -1 }}
             whileTap={{ scale: 0.97 }}
-            className="flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-white text-[13px] font-semibold cursor-pointer"
+            className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-white text-[12px] font-semibold cursor-pointer"
             style={{
               background: "linear-gradient(135deg, var(--accent), var(--accent-dark))",
-              boxShadow: "0 4px 18px var(--accent-glow)",
+              boxShadow: "0 4px 14px var(--accent-glow)",
             }}
           >
-            <Plus style={{ width: 15, height: 15 }} strokeWidth={2.5} />
+            <Plus style={{ width: 13, height: 13 }} strokeWidth={2.5} />
             今日を記録する
           </motion.div>
         </Link>
       </div>
 
-      {/* Divider */}
-      <div className="mx-6 mb-4 h-px" style={{ background: "var(--glass-border)" }} />
-
-      {/* Stats */}
-      {stats && (
-        <div className="mx-5 mb-4">
-          <p className="text-[10px] font-medium text-muted uppercase tracking-widest px-1 mb-2">今日の記録</p>
-          <div className="glass p-4 rounded-2xl" style={{ borderRadius: 18 }}>
-            <div className="flex items-center justify-between mb-2.5">
-              <div className="flex items-center gap-2">
-                <BarChart3 style={{ width: 13, height: 13, color: "var(--accent)" }} strokeWidth={1.8} />
-                <span className="text-[12px] text-secondary">今日</span>
-              </div>
-              <span className="text-[14px] font-bold text-primary">{stats.todayCount}件</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <BookOpen style={{ width: 13, height: 13, color: "var(--accent)" }} strokeWidth={1.8} />
-                <span className="text-[12px] text-secondary">総記録数</span>
-              </div>
-              <span className="text-[14px] font-bold text-primary">{stats.totalCount}件</span>
-            </div>
-          </div>
-        </div>
-      )}
+      <div className="mx-5 mb-4 h-px" style={{ background: "var(--glass-border)" }} />
 
       {/* User profile */}
-      <div className="mx-5 mb-6">
-        <div className="glass p-4 rounded-2xl" style={{ borderRadius: 18 }}>
-          <div className="flex items-center gap-3 mb-3">
-            <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-[14px] flex-shrink-0"
-              style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-dark))" }}
+      <div className="mx-4 mb-6">
+        {stats && (
+          <div className="glass p-3 rounded-xl" style={{ borderRadius: 16 }}>
+            <div className="flex items-center gap-2.5 mb-2.5">
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0"
+                style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-dark))" }}>
+                {stats.displayName.charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[12px] font-semibold text-primary truncate">{stats.displayName}</p>
+                <p className="text-[9px] text-muted truncate">{stats.totalCount}件の記録</p>
+              </div>
+            </div>
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={handleSignOut}
+              className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[11px] font-medium cursor-pointer"
+              style={{ background: "rgba(239,68,68,0.08)", color: "#f87171", border: "1px solid rgba(239,68,68,0.14)" }}
             >
-              {stats?.displayName?.charAt(0)?.toUpperCase() ?? "?"}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-semibold text-primary truncate">{stats?.displayName ?? "..."}</p>
-              <p className="text-[10px] text-muted truncate">{stats?.email ?? ""}</p>
-            </div>
+              <LogOut style={{ width: 11, height: 11 }} /> ログアウト
+            </motion.button>
           </div>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={handleSignOut}
-            className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-[12px] font-medium cursor-pointer"
-            style={{ background: "rgba(239,68,68,0.09)", color: "#f87171", border: "1px solid rgba(239,68,68,0.16)" }}
-          >
-            <LogOut style={{ width: 12, height: 12 }} /> ログアウト
-          </motion.button>
-        </div>
+        )}
       </div>
     </aside>
   );
@@ -189,7 +160,7 @@ export function BottomNav() {
             <Link key={item.href} href={item.href}>
               <motion.div
                 whileTap={{ scale: 0.86 }}
-                className="flex flex-col items-center gap-1 px-3 py-2 rounded-2xl min-w-[64px]"
+                className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl min-w-[56px]"
                 style={{
                   background: active ? "var(--glass-strong-bg)" : "transparent",
                   color: active ? "var(--accent)" : "var(--text-muted)",
