@@ -82,7 +82,7 @@ export function NewEntryForm({ editEntry }: { editEntry?: {
   }
 
   return (
-    <div className="py-8 animate-fade-up relative z-10">
+    <div className="py-4 lg:py-0 animate-fade-up relative z-10 max-w-2xl">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <button

@@ -35,7 +35,7 @@ export function EntryDetail({ entry }: { entry: Entry }) {
   }
 
   return (
-    <div className="py-8 animate-fade-up relative z-10">
+    <div className="py-4 lg:py-0 animate-fade-up relative z-10 max-w-2xl">
       {/* Back */}
       <div className="flex items-center justify-between mb-6">
         <button
