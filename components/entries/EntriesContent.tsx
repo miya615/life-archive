@@ -11,10 +11,14 @@ function formatDate(dateStr: string) {
 }
 
 const CAT_GRADIENTS: Record<string, string> = {
-  日常: "from-sky-700/40 to-blue-800/40", 健康: "from-emerald-700/40 to-teal-800/40",
-  仕事: "from-indigo-700/40 to-violet-800/40", 学習: "from-violet-700/40 to-purple-800/40",
-  お金: "from-amber-700/40 to-yellow-800/40", 人間関係: "from-rose-700/40 to-pink-800/40",
-  アイデア: "from-orange-700/40 to-red-800/40", 思い出: "from-pink-700/40 to-rose-800/40",
+  思い出: "linear-gradient(135deg, rgba(91,33,182,0.55) 0%, rgba(37,99,235,0.38) 100%)",
+  健康:   "linear-gradient(135deg, rgba(5,150,105,0.55) 0%, rgba(6,182,212,0.38) 100%)",
+  仕事:   "linear-gradient(135deg, rgba(30,58,138,0.55) 0%, rgba(67,56,202,0.38) 100%)",
+  学習:   "linear-gradient(135deg, rgba(37,99,235,0.55) 0%, rgba(14,165,233,0.38) 100%)",
+  お金:   "linear-gradient(135deg, rgba(180,83,9,0.55) 0%, rgba(234,179,8,0.38) 100%)",
+  人間関係:"linear-gradient(135deg, rgba(194,65,12,0.55) 0%, rgba(239,68,68,0.38) 100%)",
+  アイデア:"linear-gradient(135deg, rgba(157,23,77,0.55) 0%, rgba(139,92,246,0.38) 100%)",
+  日常:   "linear-gradient(135deg, rgba(3,105,161,0.55) 0%, rgba(37,99,235,0.38) 100%)",
 };
 
 const CARD = {
@@ -112,8 +116,8 @@ export function EntriesContent({ entries }: { entries: Entry[] }) {
                         </span>
                       </div>
                     ) : (
-                      <div className={`flex items-center justify-center bg-gradient-to-br ${CAT_GRADIENTS[entry.category] ?? "from-violet-800/40 to-indigo-900/40"}`}
-                        style={{ height: 100 }}>
+                      <div className="flex items-center justify-center"
+                        style={{ height: 100, background: CAT_GRADIENTS[entry.category] ?? "linear-gradient(135deg, rgba(67,56,202,0.55) 0%, rgba(30,58,138,0.38) 100%)" }}>
                         <span className="text-4xl opacity-60">{CATEGORY_ICONS[entry.category]}</span>
                       </div>
                     )}

@@ -1,11 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
+const notoSansJP = Noto_Sans_JP({
+  weight: ["300", "400", "500", "700"],
+  variable: "--font-jp",
   display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -29,8 +30,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ja" className={`h-full ${inter.variable}`}>
-      <body className="min-h-full font-sans">{children}</body>
+    <html lang="ja" className={`h-full ${notoSansJP.variable}`}>
+      <body className="min-h-full">{children}</body>
     </html>
   );
 }
