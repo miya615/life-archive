@@ -1,22 +1,32 @@
 "use client";
 
-import { BottomNav, SideNav } from "./BottomNav";
+import { TimeBackground } from "./TimeBackground";
+import { SideNav, BottomNav } from "./SideNav";
+import { RightPanel } from "./RightPanel";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen min-h-dvh flex">
-      {/* Desktop sidebar */}
-      <SideNav />
+    <>
+      {/* Dynamic background */}
+      <TimeBackground />
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0">
-        <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 pb-28 lg:pb-12 pt-2 lg:pt-8">
-          {children}
+      <div className="min-h-screen min-h-dvh flex relative z-10">
+        {/* Left sidebar — desktop */}
+        <SideNav />
+
+        {/* Center content */}
+        <main className="flex-1 min-w-0 px-4 sm:px-6 lg:px-8 xl:px-10 py-6 lg:py-8 pb-28 lg:pb-10 overflow-x-hidden">
+          <div className="max-w-4xl mx-auto xl:mx-0">
+            {children}
+          </div>
         </main>
+
+        {/* Right panel — large desktop */}
+        <RightPanel />
       </div>
 
       {/* Mobile bottom nav */}
       <BottomNav />
-    </div>
+    </>
   );
 }

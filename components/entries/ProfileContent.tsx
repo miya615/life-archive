@@ -3,21 +3,19 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { Edit2, LogOut, Check, X, BookOpen, Image, Tag, Sparkles } from "lucide-react";
 import { CATEGORY_ICONS } from "@/lib/types";
 
 interface Props {
-  email: string;
-  displayName: string;
-  avatarUrl: string | null;
-  totalEntries: number;
-  photoCount: number;
-  categoryStats: Record<string, number>;
-  memberSince: string;
+  email: string; displayName: string; avatarUrl: string | null;
+  totalEntries: number; photoCount: number;
+  categoryStats: Record<string, number>; memberSince: string;
 }
 
-export function ProfileContent({ email, displayName: initialDisplayName, avatarUrl, totalEntries, photoCount, categoryStats, memberSince }: Props) {
+export function ProfileContent({ email, displayName: init, avatarUrl, totalEntries, photoCount, categoryStats, memberSince }: Props) {
   const router = useRouter();
-  const [displayName, setDisplayName] = useState(initialDisplayName);
+  const [displayName, setDisplayName] = useState(init);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -26,9 +24,7 @@ export function ProfileContent({ email, displayName: initialDisplayName, avatarU
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     await supabase.from("profiles").upsert({ id: user!.id, display_name: displayName, updated_at: new Date().toISOString() });
-    setSaving(false);
-    setEditing(false);
-    router.refresh();
+    setSaving(false); setEditing(false); router.refresh();
   }
 
   async function handleSignOut() {
@@ -37,121 +33,143 @@ export function ProfileContent({ email, displayName: initialDisplayName, avatarU
     window.location.href = "/auth";
   }
 
-  const topCategories = Object.entries(categoryStats).sort(([, a], [, b]) => b - a).slice(0, 5);
+  const topCats = Object.entries(categoryStats).sort(([, a], [, b]) => b - a).slice(0, 6);
+  const daysUsing = Math.floor((Date.now() - new Date(memberSince).getTime()) / 86400000);
+
+  const stats = [
+    { label: "総記録数", value: totalEntries, icon: BookOpen },
+    { label: "写真付き", value: photoCount, icon: Image },
+    { label: "カテゴリ数", value: Object.keys(categoryStats).length, icon: Tag },
+    { label: "利用日数", value: daysUsing, icon: Sparkles },
+  ];
 
   return (
-    <div className="animate-fade-up relative z-10 py-4 lg:py-0">
-      <div className="mb-6 lg:mb-8">
+    <div className="space-y-6">
+      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-2xl lg:text-3xl font-bold text-primary">マイページ</h1>
         <p className="text-xs text-muted mt-1">アカウントと記録の統計</p>
-      </div>
+      </motion.div>
 
-      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-
-        {/* Left: profile card + sign out */}
-        <div className="flex flex-col gap-5 lg:w-80 xl:w-96 flex-shrink-0">
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* Left */}
+        <div className="flex flex-col gap-5 lg:w-80 flex-shrink-0">
           {/* Profile card */}
-          <div className="glass-strong rounded-3xl p-6 shadow-2xl shadow-black/30">
-            <div className="flex items-center gap-4 mb-5">
-              <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white text-2xl font-bold shadow-xl shadow-violet-500/30 flex-shrink-0 overflow-hidden">
-                {avatarUrl ? (
-                  <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  displayName.charAt(0).toUpperCase()
-                )}
+          <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}
+            className="glass-strong p-6"
+            style={{ boxShadow: "0 8px 40px var(--accent-glow)" }}
+          >
+            {/* Avatar */}
+            <div className="flex flex-col items-center mb-5">
+              <div className="w-20 h-20 rounded-3xl overflow-hidden flex items-center justify-center text-white text-3xl font-bold shadow-xl mb-3"
+                style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-dark))" }}>
+                {avatarUrl
+                  ? <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+                  : displayName.charAt(0).toUpperCase()
+                }
               </div>
-              <div className="flex-1 min-w-0">
-                {editing ? (
-                  <input
-                    type="text"
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                    className="w-full text-base font-semibold text-primary bg-white/10 rounded-xl px-3 py-1.5 border border-white/15"
-                  />
-                ) : (
-                  <p className="text-base font-semibold text-primary truncate">{displayName}</p>
-                )}
-                <p className="text-xs text-muted mt-0.5 truncate">{email}</p>
-                <p className="text-[10px] text-muted mt-1">
-                  {new Date(memberSince).toLocaleDateString("ja-JP")} から利用中
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-2">
               {editing ? (
-                <>
-                  <button onClick={() => setEditing(false)} className="flex-1 py-2.5 glass rounded-xl text-sm font-medium text-secondary">キャンセル</button>
-                  <button onClick={handleSave} disabled={saving} className="flex-1 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-xl text-sm font-medium text-white disabled:opacity-60 shadow-lg shadow-violet-600/30">
-                    {saving ? "保存中..." : "保存"}
-                  </button>
-                </>
+                <input type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)}
+                  className="text-center text-base font-semibold text-primary bg-transparent border-b w-48"
+                  style={{ borderColor: "var(--accent)" }}
+                  autoFocus
+                />
               ) : (
-                <button onClick={() => setEditing(true)} className="flex-1 py-2.5 glass rounded-xl text-sm font-medium text-secondary hover:text-primary transition-colors">
-                  名前を変更
-                </button>
+                <p className="text-base font-semibold text-primary">{displayName}</p>
               )}
+              <p className="text-xs text-muted mt-1">{email}</p>
+              <p className="text-[10px] text-muted mt-1">
+                {new Date(memberSince).toLocaleDateString("ja-JP")} から利用
+              </p>
             </div>
-          </div>
 
-          {/* AI feature teaser */}
-          <div className="glass rounded-3xl p-5 shadow-xl shadow-black/20 border border-violet-500/20">
+            {/* Edit buttons */}
+            {editing ? (
+              <div className="flex gap-2">
+                <motion.button whileTap={{ scale: 0.95 }} onClick={() => setEditing(false)}
+                  className="flex-1 py-2.5 glass rounded-2xl text-sm font-medium text-secondary flex items-center justify-center gap-1.5">
+                  <X className="w-3.5 h-3.5" /> キャンセル
+                </motion.button>
+                <motion.button whileTap={{ scale: 0.95 }} onClick={handleSave} disabled={saving}
+                  className="flex-1 py-2.5 rounded-2xl text-sm font-medium text-white flex items-center justify-center gap-1.5 disabled:opacity-60"
+                  style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-dark))" }}>
+                  <Check className="w-3.5 h-3.5" /> {saving ? "保存中..." : "保存"}
+                </motion.button>
+              </div>
+            ) : (
+              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => setEditing(true)}
+                className="w-full py-2.5 glass rounded-2xl text-sm font-medium text-secondary flex items-center justify-center gap-2">
+                <Edit2 className="w-3.5 h-3.5" /> 名前を変更
+              </motion.button>
+            )}
+          </motion.div>
+
+          {/* AI teaser */}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
+            className="glass p-5" style={{ border: "1px solid rgba(var(--accent-rgb, 167, 139, 250), 0.35)" }}>
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-violet-600/30 to-indigo-600/30 border border-violet-400/20 flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0"
+                style={{ background: "linear-gradient(135deg, var(--glass-strong-bg), var(--glass-bg))", border: "1px solid var(--glass-border)" }}>
                 <span className="text-xl">✨</span>
               </div>
               <div>
                 <p className="text-sm font-semibold text-primary">AI機能 — 近日公開</p>
-                <p className="text-xs text-muted mt-1 leading-relaxed">
-                  AI検索、月末レポート、第二の脳機能を準備中。
-                </p>
+                <p className="text-xs text-muted mt-1 leading-relaxed">AI検索・月末レポート・第二の脳機能を準備中。</p>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Sign out */}
-          <button onClick={handleSignOut} className="w-full py-3.5 glass rounded-2xl text-sm font-medium text-red-400 border border-red-500/15 hover:bg-red-500/10 transition-colors">
-            ログアウト
-          </button>
+          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={handleSignOut}
+            className="w-full py-3.5 glass rounded-2xl text-sm font-medium flex items-center justify-center gap-2"
+            style={{ color: "#f87171", border: "1px solid rgba(239,68,68,0.2)" }}>
+            <LogOut className="w-4 h-4" /> ログアウト
+          </motion.button>
         </div>
 
-        {/* Right: stats */}
+        {/* Right */}
         <div className="flex-1 min-w-0 flex flex-col gap-5">
           {/* Stats grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            <div className="glass rounded-3xl p-5 shadow-xl shadow-black/20 text-center">
-              <p className="text-3xl font-bold text-primary">{totalEntries}</p>
-              <p className="text-xs text-muted mt-2">総記録数</p>
-            </div>
-            <div className="glass rounded-3xl p-5 shadow-xl shadow-black/20 text-center">
-              <p className="text-3xl font-bold text-primary">{photoCount}</p>
-              <p className="text-xs text-muted mt-2">写真付き記録</p>
-            </div>
-            <div className="glass rounded-3xl p-5 shadow-xl shadow-black/20 text-center col-span-2 sm:col-span-1">
-              <p className="text-3xl font-bold text-primary">{Object.keys(categoryStats).length}</p>
-              <p className="text-xs text-muted mt-2">使用カテゴリ</p>
-            </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {stats.map((s, i) => (
+              <motion.div key={s.label}
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.06 }}
+                whileHover={{ scale: 1.04, y: -2 }}
+                className="glass p-4 text-center"
+              >
+                <s.icon className="w-4 h-4 text-accent mx-auto mb-2" strokeWidth={1.8} />
+                <p className="text-2xl lg:text-3xl font-bold text-primary">{s.value}</p>
+                <p className="text-[10px] text-muted mt-1">{s.label}</p>
+              </motion.div>
+            ))}
           </div>
 
-          {/* Category breakdown */}
-          {topCategories.length > 0 && (
-            <div className="glass rounded-3xl p-6 shadow-xl shadow-black/20 flex-1">
+          {/* Category chart */}
+          {topCats.length > 0 && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
+              className="glass p-6 flex-1">
               <h3 className="text-sm font-semibold text-secondary mb-5">カテゴリ別記録</h3>
               <div className="space-y-4">
-                {topCategories.map(([cat, count]) => (
-                  <div key={cat} className="flex items-center gap-3">
-                    <span className="text-base w-6 text-center flex-shrink-0">{CATEGORY_ICONS[cat as keyof typeof CATEGORY_ICONS] ?? "📝"}</span>
-                    <span className="text-sm text-secondary w-16 flex-shrink-0">{cat}</span>
-                    <div className="flex-1 h-2 bg-white/8 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-violet-500 to-indigo-500 rounded-full transition-all duration-700"
-                        style={{ width: `${(count / totalEntries) * 100}%` }}
+                {topCats.map(([cat, count], i) => (
+                  <motion.div key={cat} className="flex items-center gap-3"
+                    initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 + i * 0.07 }}>
+                    <span className="text-base w-6 text-center flex-shrink-0">
+                      {CATEGORY_ICONS[cat as keyof typeof CATEGORY_ICONS] ?? "📝"}
+                    </span>
+                    <span className="text-sm text-secondary w-16 flex-shrink-0 truncate">{cat}</span>
+                    <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: "var(--glass-border)" }}>
+                      <motion.div
+                        className="h-full rounded-full"
+                        style={{ background: "linear-gradient(90deg, var(--accent), var(--accent-dark))" }}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${(count / totalEntries) * 100}%` }}
+                        transition={{ duration: 0.8, delay: 0.5 + i * 0.07 }}
                       />
                     </div>
                     <span className="text-xs text-muted w-8 text-right flex-shrink-0">{count}</span>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
-            </div>
+            </motion.div>
           )}
         </div>
       </div>
