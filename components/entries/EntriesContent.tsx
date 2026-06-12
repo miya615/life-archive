@@ -14,7 +14,7 @@ const CARD = {
   hidden:  { opacity: 0, y: 8, scale: 0.98 },
   visible: (i: number) => ({
     opacity: 1, y: 0, scale: 1,
-    transition: { delay: Math.min(i * 0.02, 0.08), duration: 0.14, ease: "easeOut" as const },
+    transition: { delay: Math.min(i * 0.02, 0.10), duration: 0.14, ease: "easeOut" as const },
   }),
 };
 
