@@ -351,7 +351,11 @@ export function HomeContent() {
       {loading ? (
         <HomeSkeleton />
       ) : (
-        entries && data && <HomeCards entries={entries} reflection={data.reflection} />
+        entries && data && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+            <HomeCards entries={entries} reflection={data.reflection} />
+          </motion.div>
+        )
       )}
     </main>
   );
