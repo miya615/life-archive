@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Plus, X, ArrowRight } from "lucide-react";
@@ -8,71 +8,91 @@ import { Entry, Category, CATEGORIES, CATEGORY_ICONS } from "@/lib/types";
 import { formatDate, CAT_GRADIENTS } from "@/lib/utils";
 
 const CARD = {
-  hidden:  { opacity: 0, y: 16, scale: 0.97 },
-  visible: (i: number) => ({ opacity: 1, y: 0, scale: 1, transition: { delay: Math.min(i * 0.03, 0.15), duration: 0.20, ease: "easeOut" as const } }),
+  hidden:  { opacity: 0, y: 12, scale: 0.97 },
+  visible: (i: number) => ({ opacity: 1, y: 0, scale: 1, transition: { delay: Math.min(i * 0.025, 0.12), duration: 0.18, ease: "easeOut" as const } }),
 };
 
 export function EntriesContent({ entries }: { entries: Entry[] }) {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<Category | "すべて">("すべて");
 
-  const filtered = entries.filter((e) => {
+  const filtered = useMemo(() => entries.filter((e) => {
     const matchCat = selectedCategory === "すべて" || e.category === selectedCategory;
     const matchSearch = !search || e.title.toLowerCase().includes(search.toLowerCase()) || (e.content?.toLowerCase() ?? "").includes(search.toLowerCase());
     return matchCat && matchSearch;
-  });
+  }), [entries, search, selectedCategory]);
 
   return (
-    <div className="space-y-6 lg:space-y-8">
+    <div className="space-y-5 lg:space-y-7">
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="flex items-end justify-between">
         <div>
           <h1 className="text-2xl lg:text-3xl xl:text-4xl font-bold text-primary">記録一覧</h1>
           <p className="text-sm text-muted mt-1">{filtered.length}件の記録</p>
         </div>
-        <Link href="/entries/new">
-          <div
-            className="flex items-center gap-2 px-5 py-3 rounded-2xl text-white font-semibold text-sm cursor-pointer active:scale-95 transition-transform duration-100"
-            style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-dark))", boxShadow: "0 4px 20px var(--accent-glow)", touchAction: "manipulation" }}>
-            <Plus className="w-4 h-4" strokeWidth={2.5} />
-            <span className="hidden sm:inline">新しい記録</span>
-          </div>
+        <Link
+          href="/entries/new"
+          className="flex items-center gap-2 px-5 py-3 rounded-2xl text-white font-semibold text-sm active:scale-95 transition-transform duration-100"
+          style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-dark))", boxShadow: "0 4px 20px var(--accent-glow)", touchAction: "manipulation" }}>
+          <Plus className="w-4 h-4" strokeWidth={2.5} />
+          <span className="hidden sm:inline">新しい記録</span>
         </Link>
       </motion.div>
 
-      {/* Search */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}
-        className="glass flex items-center gap-3 px-5 py-4">
-        <Search className="w-5 h-5 flex-shrink-0 text-muted" strokeWidth={1.8} />
-        <input type="text" placeholder="タイトル・本文でキーワード検索..." value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 bg-transparent text-sm lg:text-base text-primary placeholder:text-muted" />
-        <AnimatePresence>
-          {search && (
-            <motion.button initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.7 }}
-              onClick={() => setSearch("")} className="text-muted hover:text-secondary transition-colors">
-              <X className="w-4 h-4" />
-            </motion.button>
-          )}
-        </AnimatePresence>
+      {/* Search — 幅を抑えて高さを確保 */}
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.05 }}>
+        <div className="relative w-[92%] max-w-[400px]">
+          <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted" strokeWidth={1.8} />
+          <input
+            type="text"
+            placeholder="タイトル・本文で検索"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="h-12 w-full rounded-full bg-white border pl-11 pr-11 text-base font-medium text-primary placeholder:text-muted outline-none"
+            style={{
+              borderColor: "var(--glass-border)",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+            }}
+          />
+          <AnimatePresence>
+            {search && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.7 }}
+                onClick={() => setSearch("")}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted"
+                style={{ touchAction: "manipulation" }}
+              >
+                <X className="w-4 h-4" />
+              </motion.button>
+            )}
+          </AnimatePresence>
+        </div>
       </motion.div>
 
-      {/* Category filter */}
-      <div className="flex gap-2.5 overflow-x-auto scrollbar-hide pb-1">
-        {(["すべて", ...CATEGORIES] as const).map((cat, i) => (
-          <button key={cat}
-            onClick={() => setSelectedCategory(cat as Category | "すべて")}
-            className="flex-shrink-0 text-sm font-semibold px-4 py-2.5 rounded-full transition-transform duration-100 active:scale-95"
-            style={{
-              touchAction: "manipulation",
-              background: selectedCategory === cat ? "linear-gradient(135deg, var(--accent), var(--accent-dark))" : "var(--glass-bg)",
-              color: selectedCategory === cat ? "white" : "var(--text-secondary)",
-              border: "1px solid var(--glass-border)",
-              boxShadow: selectedCategory === cat ? "0 2px 14px var(--accent-glow)" : "none",
-            }}>
-            {cat !== "すべて" ? `${CATEGORY_ICONS[cat as Category]} ` : "✦ "}{cat}
-          </button>
-        ))}
+      {/* Category filter — 44px タップターゲット */}
+      <div className="-mx-4 overflow-x-auto px-4 pb-1 scrollbar-hide">
+        <div className="flex w-max items-center gap-2.5">
+          {(["すべて", ...CATEGORIES] as const).map((cat) => {
+            const active = selectedCategory === cat;
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setSelectedCategory(cat as Category | "すべて")}
+                className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-full px-4 py-2.5 text-[15px] font-bold transition-transform duration-100 active:scale-95"
+                style={{
+                  touchAction: "manipulation",
+                  background: active ? "linear-gradient(135deg, var(--accent), var(--accent-dark))" : "white",
+                  color: active ? "white" : "var(--text-secondary)",
+                  border: active ? "none" : "1px solid var(--glass-border)",
+                  boxShadow: active ? "0 4px 16px var(--accent-glow)" : "0 1px 4px rgba(0,0,0,0.06)",
+                }}
+              >
+                {cat !== "すべて" ? `${CATEGORY_ICONS[cat as Category]} ` : "✦ "}{cat}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Grid */}
@@ -90,7 +110,7 @@ export function EntriesContent({ entries }: { entries: Entry[] }) {
                 <Link href={`/entries/${entry.id}`}>
                   <div
                     className="glass overflow-hidden cursor-pointer h-full flex flex-col active:scale-[0.98] transition-transform duration-100"
-                    style={{ boxShadow: "var(--card-shadow)", minHeight: 160 }}>
+                    style={{ boxShadow: "var(--card-shadow)", minHeight: 160, touchAction: "manipulation" }}>
                     {entry.image_url ? (
                       <div className="relative overflow-hidden" style={{ height: 100 }}>
                         <img src={entry.image_url} alt="" className="w-full h-full object-cover opacity-92" />
