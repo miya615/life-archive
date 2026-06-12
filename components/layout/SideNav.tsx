@@ -17,15 +17,8 @@ const NAV = [
   { href: "/profile",  label: "自分",  icon: User },
 ];
 
-/* ─────────────────────────────────────────────
-   SideNavStats
-   デスクトップでのみマウントされる。
-   Supabase 通信（getUser / profiles / entries count）は
-   このコンポーネントが実際にマウントされたときだけ実行される。
-   モバイルでは親がこのコンポーネントを描画しないため、
-   一切の通信が発生しない。
-───────────────────────────────────────────── */
-function SideNavStats() {
+export function SideNav() {
+  const pathname = usePathname();
   const router = useRouter();
   const [stats, setStats] = useState<{
     displayName: string;
@@ -33,8 +26,14 @@ function SideNavStats() {
   } | null>(null);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
+    if (!isDesktop) return;
+
     const supabase = createClient();
-    (async () => {
+
+    async function load() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       const [{ data: profile }, { count: total }] = await Promise.all([
@@ -45,7 +44,9 @@ function SideNavStats() {
         displayName: profile?.display_name ?? user.email?.split("@")[0] ?? "ゲスト",
         totalCount: total ?? 0,
       });
-    })();
+    }
+
+    load();
   }, []);
 
   async function handleSignOut() {
@@ -53,48 +54,6 @@ function SideNavStats() {
     await supabase.auth.signOut();
     router.push("/auth");
   }
-
-  if (!stats) return null;
-
-  return (
-    <div className="mx-4 mb-6">
-      <div className="glass p-3 rounded-xl" style={{ borderRadius: 16 }}>
-        <div className="flex items-center gap-2.5 mb-2.5">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0"
-            style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-dark))" }}>
-            {stats.displayName.charAt(0).toUpperCase()}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[12px] font-semibold text-primary truncate">{stats.displayName}</p>
-            <p className="text-[9px] text-muted truncate">{stats.totalCount}件の記録</p>
-          </div>
-        </div>
-        <motion.button
-          whileTap={{ scale: 0.97 }}
-          onClick={handleSignOut}
-          className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[11px] font-medium cursor-pointer"
-          style={{ background: "rgba(239,68,68,0.08)", color: "#f87171", border: "1px solid rgba(239,68,68,0.14)" }}
-        >
-          <LogOut style={{ width: 11, height: 11 }} /> ログアウト
-        </motion.button>
-      </div>
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────────
-   SideNav（デスクトップ専用サイドバー）
-   レイアウト上は常に存在するが、SideNavStats は
-   isDesktop が確定した後にのみマウントされる。
-───────────────────────────────────────────── */
-export function SideNav() {
-  const pathname = usePathname();
-  const [isDesktop, setIsDesktop] = useState(false);
-
-  useEffect(() => {
-    // matchMedia で確実にデスクトップ判定。モバイルでは false のまま。
-    setIsDesktop(window.matchMedia("(min-width: 1024px)").matches);
-  }, []);
 
   return (
     <aside
@@ -159,8 +118,31 @@ export function SideNav() {
 
       <div className="mx-5 mb-4 h-px" style={{ background: "var(--glass-border)" }} />
 
-      {/* Stats — デスクトップ確定後にのみマウント → モバイルで通信ゼロ */}
-      {isDesktop && <SideNavStats />}
+      {/* User stats */}
+      {stats && (
+        <div className="mx-4 mb-6">
+          <div className="glass p-3 rounded-xl" style={{ borderRadius: 16 }}>
+            <div className="flex items-center gap-2.5 mb-2.5">
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0"
+                style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-dark))" }}>
+                {stats.displayName.charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[12px] font-semibold text-primary truncate">{stats.displayName}</p>
+                <p className="text-[9px] text-muted truncate">{stats.totalCount}件の記録</p>
+              </div>
+            </div>
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={handleSignOut}
+              className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[11px] font-medium cursor-pointer"
+              style={{ background: "rgba(239,68,68,0.08)", color: "#f87171", border: "1px solid rgba(239,68,68,0.14)" }}
+            >
+              <LogOut style={{ width: 11, height: 11 }} /> ログアウト
+            </motion.button>
+          </div>
+        </div>
+      )}
     </aside>
   );
 }
