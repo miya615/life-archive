@@ -85,7 +85,7 @@ export function SideNav() {
             <Link key={item.href} href={item.href}>
               <motion.div
                 whileTap={{ scale: 0.97 }}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all cursor-pointer"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors duration-100 cursor-pointer"
                 style={{
                   background: active ? "var(--glass-strong-bg)" : "transparent",
                   color: active ? "var(--accent)" : "var(--text-muted)",

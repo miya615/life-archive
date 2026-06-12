@@ -27,26 +27,26 @@ function getPeriod(): Period {
 }
 
 const TIME_CONFIG: Record<Period, {
-  greeting: string; subGreeting: string; message: string;
+  greeting: string; message: string;
   heroGlow: string; btnText: string;
 }> = {
   morning: {
-    greeting: "おはようございます", subGreeting: "新しい一日が始まりました",
+    greeting: "おはようございます",
     message: "今朝の気持ちや決意を、未来の自分への手紙として残しておきましょう。",
     heroGlow: "rgba(56,189,248,0.12)", btnText: "今日を記録する",
   },
   noon: {
-    greeting: "こんにちは", subGreeting: "今日も丁寧に過ごしていますか",
+    greeting: "こんにちは",
     message: "今の気持ちや出来事を、数年後の自分が読み返せるように残しましょう。",
     heroGlow: "rgba(251,191,36,0.12)", btnText: "今を記録する",
   },
   evening: {
-    greeting: "おつかれさまです", subGreeting: "今日一日を振り返る時間です",
+    greeting: "おつかれさまです",
     message: "何気ない1日も、未来の自分には大切な記録です。今日を静かに残しましょう。",
     heroGlow: "rgba(244,114,182,0.10)", btnText: "今日を残す",
   },
   night: {
-    greeting: "おかえり", subGreeting: "今日もよく頑張りました",
+    greeting: "おかえり",
     message: "一日の終わりに、今日の記憶を静かに残しましょう。眠る前のほんの数分で。",
     heroGlow: "rgba(139,124,248,0.12)", btnText: "今日の記憶を残す",
   },
@@ -72,7 +72,7 @@ interface Props {
 
 export function HomeContent({ entries, monthCount, todayCount, displayName }: Props) {
   const period = getPeriod();
-  const { greeting, subGreeting, message, heroGlow, btnText } = TIME_CONFIG[period];
+  const { greeting, message, heroGlow, btnText } = TIME_CONFIG[period];
 
   function narrativeStat() {
     if (todayCount === 0) return "今日はまだ記録がありません";
@@ -86,7 +86,7 @@ export function HomeContent({ entries, monthCount, todayCount, displayName }: Pr
       <motion.div
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
       >
         <div
           className="glass-strong relative overflow-hidden"
@@ -104,11 +104,10 @@ export function HomeContent({ entries, monthCount, todayCount, displayName }: Pr
           <div className="relative">
             <p className="text-[12px] text-muted font-medium mb-6 tracking-wide">{todayFormatted()}</p>
             <p className="text-[13px] text-muted mb-1">{greeting}、</p>
-            <h1 className="font-bold text-primary leading-tight mb-1"
+            <h1 className="font-bold text-primary leading-tight mb-4"
               style={{ fontSize: "clamp(28px, 5vw, 46px)" }}>
               {displayName}さん
             </h1>
-            <p className="text-[13px] text-muted mb-4 font-medium">{subGreeting}</p>
             <p className="text-[15px] lg:text-[17px] text-secondary leading-relaxed mb-8 max-w-lg"
               style={{ lineHeight: "1.75" }}>
               {message}
@@ -188,7 +187,7 @@ export function HomeContent({ entries, monthCount, todayCount, displayName }: Pr
               <motion.div key={entry.id}
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05, duration: 0.38, ease: "easeOut" }}
+                transition={{ delay: i * 0.03, duration: 0.22, ease: "easeOut" }}
               >
                 <Link
                   href={`/entries/${entry.id}`}

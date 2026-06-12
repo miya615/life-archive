@@ -1,13 +1,10 @@
 export const dynamic = "force-dynamic";
 import { createClient } from "@/lib/supabase/server";
-import { AppShell } from "@/components/layout/AppShell";
 import { ProfileContent } from "@/components/entries/ProfileContent";
 
 export default async function ProfilePage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -37,16 +34,14 @@ export default async function ProfilePage() {
   }
 
   return (
-    <AppShell>
-      <ProfileContent
-        email={user!.email ?? ""}
-        displayName={profile?.display_name ?? user!.email?.split("@")[0] ?? ""}
-        avatarUrl={profile?.avatar_url ?? null}
-        totalEntries={totalEntries ?? 0}
-        photoCount={photoCount ?? 0}
-        categoryStats={catMap}
-        memberSince={profile?.created_at ?? user!.created_at}
-      />
-    </AppShell>
+    <ProfileContent
+      email={user!.email ?? ""}
+      displayName={profile?.display_name ?? user!.email?.split("@")[0] ?? ""}
+      avatarUrl={profile?.avatar_url ?? null}
+      totalEntries={totalEntries ?? 0}
+      photoCount={photoCount ?? 0}
+      categoryStats={catMap}
+      memberSince={profile?.created_at ?? user!.created_at}
+    />
   );
 }

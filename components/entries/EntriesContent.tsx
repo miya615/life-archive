@@ -23,7 +23,7 @@ const CAT_GRADIENTS: Record<string, string> = {
 
 const CARD = {
   hidden:  { opacity: 0, y: 16, scale: 0.97 },
-  visible: (i: number) => ({ opacity: 1, y: 0, scale: 1, transition: { delay: i * 0.04, duration: 0.38, ease: "easeOut" as const } }),
+  visible: (i: number) => ({ opacity: 1, y: 0, scale: 1, transition: { delay: Math.min(i * 0.03, 0.15), duration: 0.20, ease: "easeOut" as const } }),
 };
 
 export function EntriesContent({ entries }: { entries: Entry[] }) {
@@ -76,7 +76,7 @@ export function EntriesContent({ entries }: { entries: Entry[] }) {
         {(["すべて", ...CATEGORIES] as const).map((cat, i) => (
           <button key={cat}
             onClick={() => setSelectedCategory(cat as Category | "すべて")}
-            className="flex-shrink-0 text-sm font-semibold px-4 py-2.5 rounded-full transition-all active:scale-95 duration-100"
+            className="flex-shrink-0 text-sm font-semibold px-4 py-2.5 rounded-full transition-transform duration-100 active:scale-95"
             style={{
               touchAction: "manipulation",
               background: selectedCategory === cat ? "linear-gradient(135deg, var(--accent), var(--accent-dark))" : "var(--glass-bg)",

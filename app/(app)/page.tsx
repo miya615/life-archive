@@ -1,6 +1,5 @@
 export const dynamic = "force-dynamic";
 import { createClient } from "@/lib/supabase/server";
-import { AppShell } from "@/components/layout/AppShell";
 import { HomeContent } from "@/components/entries/HomeContent";
 
 export default async function HomePage() {
@@ -24,13 +23,11 @@ export default async function HomePage() {
   ]);
 
   return (
-    <AppShell>
-      <HomeContent
-        entries={recentEntries ?? []}
-        monthCount={monthCount ?? 0}
-        todayCount={todayCount ?? 0}
-        displayName={profile?.display_name ?? user!.email?.split("@")[0] ?? ""}
-      />
-    </AppShell>
+    <HomeContent
+      entries={recentEntries ?? []}
+      monthCount={monthCount ?? 0}
+      todayCount={todayCount ?? 0}
+      displayName={profile?.display_name ?? user!.email?.split("@")[0] ?? ""}
+    />
   );
 }
