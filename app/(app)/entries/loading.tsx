@@ -7,17 +7,13 @@ export default function EntriesLoading() {
           <div className="h-8 w-28 rounded-2xl bg-slate-100" />
           <div className="h-4 w-16 rounded-full bg-slate-100" />
         </div>
-        <div className="h-11 w-11 rounded-2xl bg-slate-100" />
+        <div className="h-11 w-24 rounded-2xl bg-slate-100" />
       </div>
 
-      {/* Search bar */}
-      <div className="h-12 w-[92%] max-w-[400px] rounded-full bg-slate-100" />
-
-      {/* Category chips */}
-      <div className="flex gap-2.5 overflow-hidden">
-        {[60, 52, 56, 64, 52, 56, 68, 52].map((w, i) => (
-          <div key={i} className="h-11 flex-shrink-0 rounded-full bg-slate-100" style={{ width: w }} />
-        ))}
+      {/* Search + filter button row */}
+      <div className="flex items-center gap-3">
+        <div className="h-12 flex-1 rounded-full bg-slate-100" />
+        <div className="h-12 w-12 flex-shrink-0 rounded-full bg-slate-100" />
       </div>
 
       {/* Card grid */}
