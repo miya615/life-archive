@@ -150,12 +150,6 @@ export function SideNav() {
 /* ── Mobile bottom nav ── */
 export function BottomNav() {
   const pathname = usePathname();
-  const router = useRouter();
-  /*
-    pendingHref: set synchronously on tap → instant color change before navigation settles.
-    Cleared when pathname updates (navigation complete).
-    This eliminates the 1-frame lag where pathname hasn't updated yet.
-  */
   const [pendingHref, setPendingHref] = useState<string | null>(null);
 
   useEffect(() => {
@@ -174,13 +168,10 @@ export function BottomNav() {
           const active = isActive(item.href);
           const Icon = item.icon;
           return (
-            <button
+            <Link
               key={item.href}
-              type="button"
-              onClick={() => {
-                setPendingHref(item.href);
-                router.push(item.href);
-              }}
+              href={item.href}
+              onClick={() => setPendingHref(item.href)}
               className="flex flex-col items-center justify-center gap-1 py-2.5 min-h-[56px] active:scale-[0.88] transition-transform duration-100"
               style={{ touchAction: "manipulation" }}
             >
@@ -194,7 +185,7 @@ export function BottomNav() {
               >
                 {item.label}
               </span>
-            </button>
+            </Link>
           );
         })}
       </div>

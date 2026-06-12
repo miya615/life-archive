@@ -4,13 +4,10 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Plus, ArrowRight, CalendarDays } from "lucide-react";
 import { Entry, CATEGORY_ICONS } from "@/lib/types";
+import { formatDate, CAT_GRADIENTS } from "@/lib/utils";
+import type { ReflectionData } from "@/lib/utils";
 import { HomeReflections } from "./HomeReflections";
 
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("ja-JP", {
-    month: "short", day: "numeric", weekday: "short",
-  });
-}
 function todayFormatted() {
   return new Date().toLocaleDateString("ja-JP", {
     year: "numeric", month: "long", day: "numeric", weekday: "long",
@@ -52,25 +49,15 @@ const TIME_CONFIG: Record<Period, {
   },
 };
 
-const CAT_GRADIENTS: Record<string, string> = {
-  思い出:   "linear-gradient(135deg, rgba(139,92,246,0.13) 0%, rgba(59,130,246,0.09) 100%)",
-  健康:     "linear-gradient(135deg, rgba(16,185,129,0.13) 0%, rgba(6,182,212,0.09) 100%)",
-  仕事:     "linear-gradient(135deg, rgba(59,130,246,0.13) 0%, rgba(99,102,241,0.09) 100%)",
-  学習:     "linear-gradient(135deg, rgba(14,165,233,0.13) 0%, rgba(59,130,246,0.09) 100%)",
-  お金:     "linear-gradient(135deg, rgba(245,158,11,0.13) 0%, rgba(234,179,8,0.09) 100%)",
-  人間関係: "linear-gradient(135deg, rgba(239,68,68,0.13) 0%, rgba(236,72,153,0.09) 100%)",
-  アイデア: "linear-gradient(135deg, rgba(168,85,247,0.13) 0%, rgba(236,72,153,0.09) 100%)",
-  日常:     "linear-gradient(135deg, rgba(14,165,233,0.13) 0%, rgba(59,130,246,0.09) 100%)",
-};
-
 interface Props {
   entries: Entry[];
   monthCount: number;
   todayCount: number;
   displayName: string;
+  reflection: ReflectionData;
 }
 
-export function HomeContent({ entries, monthCount, todayCount, displayName }: Props) {
+export function HomeContent({ entries, monthCount, todayCount, displayName, reflection }: Props) {
   const period = getPeriod();
   const { greeting, message, heroGlow, btnText } = TIME_CONFIG[period];
 
@@ -95,7 +82,6 @@ export function HomeContent({ entries, monthCount, todayCount, displayName }: Pr
             boxShadow: `0 20px 60px ${heroGlow}, 0 1px 0 rgba(255,255,255,0.07) inset`,
           }}
         >
-          {/* Decorative glow — pointer-events:none prevents blocking taps */}
           <div className="absolute pointer-events-none" style={{
             top: "-20%", right: "-10%", width: "55%", height: "180%",
             background: `radial-gradient(ellipse, ${heroGlow} 0%, transparent 68%)`,
@@ -113,14 +99,7 @@ export function HomeContent({ entries, monthCount, todayCount, displayName }: Pr
               {message}
             </p>
 
-            {/* CTA + stats */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              {/*
-                FIX: <Link> directly with active:scale CSS.
-                Wrapping motion.div inside <Link>/<a> causes iOS double-tap:
-                first tap fires pointermove/hover on <a>, second fires click.
-                CSS active: fires on touchstart — no JS event loop needed.
-              */}
               <Link
                 href="/entries/new"
                 className="inline-flex items-center gap-2.5 rounded-2xl text-white font-semibold active:scale-[0.96] active:opacity-90 transition-transform duration-100"
@@ -154,7 +133,6 @@ export function HomeContent({ entries, monthCount, todayCount, displayName }: Pr
             <h2 className="text-[17px] font-bold text-primary">最近の記録</h2>
             <p className="text-[11px] text-muted mt-0.5">あなたの思い出・気づき・出来事</p>
           </div>
-          {/* FIX: Link直接に active: CSS — motion.span+whileTap inside Link も同様に二重タップ */}
           <Link
             href="/entries"
             className="text-[12px] flex items-center gap-1 font-medium active:opacity-60 transition-opacity duration-100"
@@ -242,7 +220,7 @@ export function HomeContent({ entries, monthCount, todayCount, displayName }: Pr
       </div>
 
       {/* ══ REFLECTIONS ══ */}
-      <HomeReflections />
+      <HomeReflections data={reflection} />
 
     </div>
   );
