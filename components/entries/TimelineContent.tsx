@@ -87,7 +87,7 @@ export function TimelineContent({ entries }: { entries: Entry[] }) {
                       <div className="h-px flex-1" style={{ background: "var(--glass-border)" }} />
                     </div>
 
-                    <div className="ml-6 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                    <div className="ml-6 grid grid-cols-2 xl:grid-cols-3 gap-3">
                       {me.map((entry, ei) => (
                         <motion.div key={entry.id}
                           initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}

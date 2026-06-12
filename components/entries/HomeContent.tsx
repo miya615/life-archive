@@ -53,14 +53,14 @@ const TIME_CONFIG: Record<Period, {
 };
 
 const CAT_GRADIENTS: Record<string, string> = {
-  思い出:   "linear-gradient(135deg, rgba(91,33,182,0.50) 0%, rgba(37,99,235,0.35) 100%)",
-  健康:     "linear-gradient(135deg, rgba(5,150,105,0.50) 0%, rgba(6,182,212,0.35) 100%)",
-  仕事:     "linear-gradient(135deg, rgba(30,58,138,0.50) 0%, rgba(67,56,202,0.35) 100%)",
-  学習:     "linear-gradient(135deg, rgba(29,78,216,0.50) 0%, rgba(14,165,233,0.35) 100%)",
-  お金:     "linear-gradient(135deg, rgba(180,83,9,0.50) 0%, rgba(217,119,6,0.35) 100%)",
-  人間関係: "linear-gradient(135deg, rgba(194,65,12,0.50) 0%, rgba(190,18,60,0.35) 100%)",
-  アイデア: "linear-gradient(135deg, rgba(126,34,206,0.50) 0%, rgba(219,39,119,0.35) 100%)",
-  日常:     "linear-gradient(135deg, rgba(3,105,161,0.50) 0%, rgba(30,64,175,0.35) 100%)",
+  思い出:   "linear-gradient(135deg, rgba(139,92,246,0.13) 0%, rgba(59,130,246,0.09) 100%)",
+  健康:     "linear-gradient(135deg, rgba(16,185,129,0.13) 0%, rgba(6,182,212,0.09) 100%)",
+  仕事:     "linear-gradient(135deg, rgba(59,130,246,0.13) 0%, rgba(99,102,241,0.09) 100%)",
+  学習:     "linear-gradient(135deg, rgba(14,165,233,0.13) 0%, rgba(59,130,246,0.09) 100%)",
+  お金:     "linear-gradient(135deg, rgba(245,158,11,0.13) 0%, rgba(234,179,8,0.09) 100%)",
+  人間関係: "linear-gradient(135deg, rgba(239,68,68,0.13) 0%, rgba(236,72,153,0.09) 100%)",
+  アイデア: "linear-gradient(135deg, rgba(168,85,247,0.13) 0%, rgba(236,72,153,0.09) 100%)",
+  日常:     "linear-gradient(135deg, rgba(14,165,233,0.13) 0%, rgba(59,130,246,0.09) 100%)",
 };
 
 interface Props {
@@ -183,62 +183,56 @@ export function HomeContent({ entries, monthCount, todayCount, displayName }: Pr
             </Link>
           </motion.div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-5">
+          <div className="grid grid-cols-2 gap-3">
             {entries.slice(0, 6).map((entry, i) => (
               <motion.div key={entry.id}
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05, duration: 0.38, ease: "easeOut" }}
               >
-                {/*
-                  FIX: <Link> is the tappable element with active: CSS.
-                  No nested motion.div — removes the double-tap source entirely.
-                */}
                 <Link
                   href={`/entries/${entry.id}`}
                   className="glass overflow-hidden flex flex-col h-full active:scale-[0.98] active:opacity-90 transition-transform duration-100 block"
-                  style={{ minHeight: 200, touchAction: "manipulation" }}
+                  style={{ minHeight: 160, touchAction: "manipulation" }}
                 >
                   {entry.image_url ? (
-                    <div className="relative overflow-hidden" style={{ height: 140 }}>
+                    <div className="relative overflow-hidden" style={{ height: 100 }}>
                       <img src={entry.image_url} alt="" className="w-full h-full object-cover"
-                        style={{ opacity: 0.9 }} />
+                        style={{ opacity: 0.92 }} />
                       <div className="absolute inset-0 pointer-events-none"
-                        style={{ background: "linear-gradient(to bottom, transparent 35%, rgba(0,0,0,0.55))" }} />
-                      <div className="absolute bottom-3 left-4 pointer-events-none">
-                        <span className="text-white text-[11px] font-semibold opacity-90">
-                          {CATEGORY_ICONS[entry.category]} {entry.category}
+                        style={{ background: "linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.45))" }} />
+                      <div className="absolute bottom-2 left-3 pointer-events-none">
+                        <span className="text-white text-[10px] font-semibold opacity-90">
+                          {CATEGORY_ICONS[entry.category]}
                         </span>
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-center justify-center relative overflow-hidden" style={{ height: 88 }}>
+                    <div className="flex items-center justify-center relative overflow-hidden" style={{ height: 68 }}>
                       <div className="absolute inset-0 pointer-events-none"
                         style={{ background: CAT_GRADIENTS[entry.category] ?? CAT_GRADIENTS["日常"] }} />
-                      <div className="absolute inset-0 pointer-events-none"
-                        style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 60%)" }} />
-                      <span className="relative text-4xl pointer-events-none" style={{ opacity: 0.5 }}>
+                      <span className="relative text-3xl pointer-events-none" style={{ opacity: 0.55 }}>
                         {CATEGORY_ICONS[entry.category]}
                       </span>
                     </div>
                   )}
 
-                  <div className="p-4 flex-1 flex flex-col">
-                    <div className="flex items-center gap-2 mb-2.5">
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                  <div className="p-3 flex-1 flex flex-col">
+                    <div className="flex items-center gap-1 mb-1.5">
+                      <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full truncate max-w-[70%]"
                         style={{ background: "var(--glass-strong-bg)", color: "var(--accent)", border: "1px solid var(--glass-border)" }}>
                         {entry.category}
                       </span>
-                      <span className="text-[10px] text-muted ml-auto">{formatDate(entry.entry_date)}</span>
+                      <span className="text-[9px] text-muted ml-auto whitespace-nowrap">{formatDate(entry.entry_date)}</span>
                     </div>
-                    <p className="text-[15px] font-bold text-primary leading-snug mb-1.5">{entry.title}</p>
+                    <p className="text-[12px] font-bold text-primary leading-snug line-clamp-2 mb-1">{entry.title}</p>
                     {entry.content && (
-                      <p className="text-[12px] text-muted line-clamp-2 leading-relaxed flex-1">{entry.content}</p>
+                      <p className="text-[11px] text-muted line-clamp-2 leading-relaxed flex-1">{entry.content}</p>
                     )}
-                    <div className="flex items-center justify-end mt-3 pt-2.5"
+                    <div className="flex items-center justify-end mt-2 pt-2"
                       style={{ borderTop: "1px solid var(--glass-border)" }}>
-                      <span className="text-[11px] flex items-center gap-1" style={{ color: "var(--accent)" }}>
-                        続きを読む <ArrowRight style={{ width: 10, height: 10 }} strokeWidth={2} />
+                      <span className="text-[10px] flex items-center gap-0.5" style={{ color: "var(--accent)" }}>
+                        続きを読む <ArrowRight style={{ width: 9, height: 9 }} strokeWidth={2} />
                       </span>
                     </div>
                   </div>

@@ -11,14 +11,14 @@ function formatDate(dateStr: string) {
 }
 
 const CAT_GRADIENTS: Record<string, string> = {
-  思い出: "linear-gradient(135deg, rgba(91,33,182,0.55) 0%, rgba(37,99,235,0.38) 100%)",
-  健康:   "linear-gradient(135deg, rgba(5,150,105,0.55) 0%, rgba(6,182,212,0.38) 100%)",
-  仕事:   "linear-gradient(135deg, rgba(30,58,138,0.55) 0%, rgba(67,56,202,0.38) 100%)",
-  学習:   "linear-gradient(135deg, rgba(37,99,235,0.55) 0%, rgba(14,165,233,0.38) 100%)",
-  お金:   "linear-gradient(135deg, rgba(180,83,9,0.55) 0%, rgba(234,179,8,0.38) 100%)",
-  人間関係:"linear-gradient(135deg, rgba(194,65,12,0.55) 0%, rgba(239,68,68,0.38) 100%)",
-  アイデア:"linear-gradient(135deg, rgba(157,23,77,0.55) 0%, rgba(139,92,246,0.38) 100%)",
-  日常:   "linear-gradient(135deg, rgba(3,105,161,0.55) 0%, rgba(37,99,235,0.38) 100%)",
+  思い出: "linear-gradient(135deg, rgba(139,92,246,0.13) 0%, rgba(59,130,246,0.09) 100%)",
+  健康:   "linear-gradient(135deg, rgba(16,185,129,0.13) 0%, rgba(6,182,212,0.09) 100%)",
+  仕事:   "linear-gradient(135deg, rgba(59,130,246,0.13) 0%, rgba(99,102,241,0.09) 100%)",
+  学習:   "linear-gradient(135deg, rgba(14,165,233,0.13) 0%, rgba(59,130,246,0.09) 100%)",
+  お金:   "linear-gradient(135deg, rgba(245,158,11,0.13) 0%, rgba(234,179,8,0.09) 100%)",
+  人間関係:"linear-gradient(135deg, rgba(239,68,68,0.13) 0%, rgba(236,72,153,0.09) 100%)",
+  アイデア:"linear-gradient(135deg, rgba(168,85,247,0.13) 0%, rgba(236,72,153,0.09) 100%)",
+  日常:   "linear-gradient(135deg, rgba(14,165,233,0.13) 0%, rgba(59,130,246,0.09) 100%)",
 };
 
 const CARD = {
@@ -98,42 +98,42 @@ export function EntriesContent({ entries }: { entries: Entry[] }) {
             <p className="text-base text-muted">記録が見つかりません</p>
           </motion.div>
         ) : (
-          <motion.div key="grid" className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+          <motion.div key="grid" className="grid grid-cols-2 xl:grid-cols-3 gap-3">
             {filtered.map((entry, i) => (
               <motion.div key={entry.id} custom={i} variants={CARD} initial="hidden" animate="visible" layout>
                 <Link href={`/entries/${entry.id}`}>
                   <div
                     className="glass overflow-hidden cursor-pointer h-full flex flex-col active:scale-[0.98] transition-transform duration-100"
-                    style={{ boxShadow: "var(--card-shadow)", minHeight: 200 }}>
+                    style={{ boxShadow: "var(--card-shadow)", minHeight: 160 }}>
                     {entry.image_url ? (
-                      <div className="relative overflow-hidden" style={{ height: 160 }}>
-                        <img src={entry.image_url} alt="" className="w-full h-full object-cover opacity-85" />
-                        <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 45%, rgba(0,0,0,0.5))" }} />
-                        <span className="absolute bottom-2 left-3 text-[10px] px-2 py-0.5 rounded-full text-white font-medium"
-                          style={{ background: "rgba(0,0,0,0.45)" }}>
-                          {entry.category}
+                      <div className="relative overflow-hidden" style={{ height: 100 }}>
+                        <img src={entry.image_url} alt="" className="w-full h-full object-cover opacity-92" />
+                        <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 35%, rgba(0,0,0,0.4))" }} />
+                        <span className="absolute bottom-2 left-2 text-[9px] px-1.5 py-0.5 rounded-full text-white font-medium"
+                          style={{ background: "rgba(0,0,0,0.40)" }}>
+                          {CATEGORY_ICONS[entry.category]}
                         </span>
                       </div>
                     ) : (
                       <div className="flex items-center justify-center"
-                        style={{ height: 100, background: CAT_GRADIENTS[entry.category] ?? "linear-gradient(135deg, rgba(67,56,202,0.55) 0%, rgba(30,58,138,0.38) 100%)" }}>
-                        <span className="text-4xl opacity-60">{CATEGORY_ICONS[entry.category]}</span>
+                        style={{ height: 68, background: CAT_GRADIENTS[entry.category] ?? "linear-gradient(135deg, rgba(59,130,246,0.13) 0%, rgba(99,102,241,0.09) 100%)" }}>
+                        <span className="text-3xl opacity-60">{CATEGORY_ICONS[entry.category]}</span>
                       </div>
                     )}
-                    <div className="p-5 flex-1 flex flex-col">
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-[11px] px-2.5 py-1 rounded-full font-semibold"
+                    <div className="p-3 flex-1 flex flex-col">
+                      <div className="flex items-center gap-1 mb-1.5">
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full font-semibold truncate max-w-[65%]"
                           style={{ background: "var(--glass-strong-bg)", color: "var(--accent)", border: "1px solid var(--glass-border)" }}>
-                          {CATEGORY_ICONS[entry.category]} {entry.category}
+                          {entry.category}
                         </span>
-                        <span className="text-xs text-muted ml-auto">{formatDate(entry.entry_date)}</span>
+                        <span className="text-[9px] text-muted ml-auto whitespace-nowrap">{formatDate(entry.entry_date)}</span>
                       </div>
-                      <p className="text-base font-bold text-primary mb-1.5">{entry.title}</p>
-                      {entry.content && <p className="text-sm text-muted line-clamp-2 leading-relaxed flex-1">{entry.content}</p>}
-                      <div className="flex items-center justify-end mt-3 pt-3"
+                      <p className="text-[12px] font-bold text-primary mb-1 leading-snug line-clamp-2">{entry.title}</p>
+                      {entry.content && <p className="text-[11px] text-muted line-clamp-2 leading-relaxed flex-1">{entry.content}</p>}
+                      <div className="flex items-center justify-end mt-2 pt-2"
                         style={{ borderTop: "1px solid var(--glass-border)" }}>
-                        <span className="text-xs text-accent flex items-center gap-1">
-                          詳細 <ArrowRight className="w-3 h-3" strokeWidth={2} />
+                        <span className="text-[10px] text-accent flex items-center gap-0.5">
+                          詳細 <ArrowRight className="w-2.5 h-2.5" strokeWidth={2} />
                         </span>
                       </div>
                     </div>
