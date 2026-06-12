@@ -352,7 +352,7 @@ export function HomeContent() {
         <HomeSkeleton />
       ) : (
         entries && data && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, delay: 0.2 }}>
             <HomeCards entries={entries} reflection={data.reflection} />
           </motion.div>
         )
