@@ -17,6 +17,7 @@ body {
   overflow-x: hidden;
   min-height: 100vh;
   min-height: 100svh;
+  overscroll-behavior-y: auto;
   font-family: var(--font-jp, "Noto Sans JP", "Hiragino Sans", "Hiragino Kaku Gothic ProN", system-ui, sans-serif);
   font-feature-settings: "kern" 1, "liga" 1;
   letter-spacing: 0.01em;
@@ -131,6 +132,11 @@ body {
 
 /* ── Safe area ── */
 .pb-safe { padding-bottom: max(env(safe-area-inset-bottom, 0px), 16px); }
+
+/* ── Mobile main scroll padding: BottomNav (~80px) + safe-area + 140px breathing room ── */
+.pb-scroll-safe {
+  padding-bottom: calc(220px + env(safe-area-inset-bottom, 0px));
+}
 
 /* ── Form resets ── */
 a, button { -webkit-tap-highlight-color: transparent; }

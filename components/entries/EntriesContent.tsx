@@ -121,19 +121,18 @@ export function EntriesContent({ entries }: { entries: Entry[] }) {
                       </div>
                     )}
                     <div className="p-3 flex-1 flex flex-col">
-                      <div className="flex items-center gap-1 mb-1.5">
-                        <span className="text-[9px] px-1.5 py-0.5 rounded-full font-semibold truncate max-w-[65%]"
-                          style={{ background: "var(--glass-strong-bg)", color: "var(--accent)", border: "1px solid var(--glass-border)" }}>
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        <span className="text-[13px] font-bold leading-none" style={{ color: "var(--accent)" }}>
                           {entry.category}
                         </span>
-                        <span className="text-[9px] text-muted ml-auto whitespace-nowrap">{formatDate(entry.entry_date)}</span>
+                        <span className="text-[11px] text-muted ml-auto whitespace-nowrap">{formatDate(entry.entry_date)}</span>
                       </div>
-                      <p className="text-[12px] font-bold text-primary mb-1 leading-snug line-clamp-2">{entry.title}</p>
+                      <p className="text-[13px] font-bold text-primary mb-1 leading-snug line-clamp-2">{entry.title}</p>
                       {entry.content && <p className="text-[11px] text-muted line-clamp-2 leading-relaxed flex-1">{entry.content}</p>}
                       <div className="flex items-center justify-end mt-2 pt-2"
                         style={{ borderTop: "1px solid var(--glass-border)" }}>
-                        <span className="text-[10px] text-accent flex items-center gap-0.5">
-                          詳細 <ArrowRight className="w-2.5 h-2.5" strokeWidth={2} />
+                        <span className="text-[11px] font-semibold text-accent flex items-center gap-0.5">
+                          詳細 <ArrowRight className="w-2.5 h-2.5" strokeWidth={2.5} />
                         </span>
                       </div>
                     </div>

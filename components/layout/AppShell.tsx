@@ -14,13 +14,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="relative z-10 flex" style={{ minHeight: "100svh" }}>
         <SideNav />
         {/*
-          pb-44 (176px) on mobile generously covers:
-            - BottomNav ~60px
-            - iPhone safe-area-inset-bottom ~34px
-            - Extra buffer ~82px
+          pb-scroll-safe on mobile covers BottomNav + safe-area + generous breathing room.
+          Defined in globals.css as calc(220px + env(safe-area-inset-bottom, 0px)).
           lg:pb-16 overrides on desktop.
         */}
-        <main className="flex-1 min-w-0 pb-44 lg:pb-16">
+        <main className="flex-1 min-w-0 pb-scroll-safe lg:pb-16">
           <div
             style={{ maxWidth: 800, margin: "0 auto", padding: "24px 16px 0" }}
             className="sm:px-6 lg:px-10 lg:pt-10"

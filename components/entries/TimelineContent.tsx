@@ -111,16 +111,15 @@ export function TimelineContent({ entries }: { entries: Entry[] }) {
                                   )}
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-1.5 mb-1 flex-wrap">
-                                      <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold"
-                                        style={{ background: "var(--glass-strong-bg)", color: "var(--accent)", border: "1px solid var(--glass-border)" }}>
-                                        {CATEGORY_ICONS[entry.category]} {entry.category}
+                                      <span className="text-[13px] font-bold leading-none" style={{ color: "var(--accent)" }}>
+                                        {entry.category}
                                       </span>
-                                      <span className="text-[10px] text-muted">{Number(entry.entry_date.split("-")[2])}日</span>
+                                      <span className="text-[11px] text-muted">{Number(entry.entry_date.split("-")[2])}日</span>
                                     </div>
                                     <p className="text-sm font-bold text-primary leading-snug">{entry.title}</p>
                                     {entry.content && <p className="text-xs text-muted mt-0.5 line-clamp-2 leading-relaxed">{entry.content}</p>}
                                     <div className="flex items-center gap-1 mt-2">
-                                      <span className="text-[10px] text-accent flex items-center gap-0.5">詳細 <ArrowRight className="w-2.5 h-2.5" /></span>
+                                      <span className="text-[11px] font-semibold text-accent flex items-center gap-0.5">詳細 <ArrowRight className="w-2.5 h-2.5" /></span>
                                     </div>
                                   </div>
                                 </div>

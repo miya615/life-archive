@@ -157,18 +157,18 @@ export function BottomNav() {
           const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
           const Icon = item.icon;
           return (
-            <Link key={item.href} href={item.href}>
-              <motion.div
-                whileTap={{ scale: 0.86 }}
-                className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl min-w-[56px]"
-                style={{
-                  background: active ? "var(--glass-strong-bg)" : "transparent",
-                  color: active ? "var(--accent)" : "var(--text-muted)",
-                }}
-              >
-                <Icon style={{ width: 20, height: 20 }} strokeWidth={active ? 2.2 : 1.6} />
-                <span className="text-[10px] font-medium">{item.label}</span>
-              </motion.div>
+            <Link
+              key={item.href}
+              href={item.href}
+              className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl min-w-[56px] active:scale-[0.88] active:opacity-75 transition-transform duration-100"
+              style={{
+                background: active ? "var(--glass-strong-bg)" : "transparent",
+                color: active ? "var(--accent)" : "var(--text-muted)",
+                touchAction: "manipulation",
+              }}
+            >
+              <Icon style={{ width: 20, height: 20 }} strokeWidth={active ? 2.2 : 1.6} />
+              <span className="text-[10px] font-medium">{item.label}</span>
             </Link>
           );
         })}
