@@ -5,8 +5,8 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Check, Plus, Search, SlidersHorizontal, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { CATEGORIES, CATEGORY_ICONS, type Category, type Entry } from "@/lib/types";
-import { CAT_GRADIENTS, formatDate } from "@/lib/utils";
+import { CATEGORIES, CATEGORY_ICONS, CARD_STYLES, type Category, type Entry } from "@/lib/types";
+import { formatDate } from "@/lib/utils";
 
 const ALL_CATS = ["すべて", ...CATEGORIES] as const;
 
@@ -41,49 +41,51 @@ function RecordGrid({ entries }: { entries: Entry[] }) {
   }
   return (
     <div className="grid grid-cols-2 xl:grid-cols-3 gap-3">
-      {entries.map((entry, i) => (
-        <motion.div key={entry.id} custom={i} variants={CARD} initial="hidden" animate="visible">
-          <Link href={`/entries/${entry.id}`}>
-            <div
-              className="glass overflow-hidden cursor-pointer h-full flex flex-col active:scale-[0.98] transition-transform duration-100"
-              style={{ boxShadow: "var(--card-shadow)", minHeight: 160, touchAction: "manipulation" }}>
-              {entry.image_url ? (
-                <div className="relative overflow-hidden" style={{ height: 100 }}>
-                  <img src={entry.image_url} alt="" className="w-full h-full object-cover" style={{ opacity: 0.92 }} />
-                  <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 35%, rgba(0,0,0,0.4))" }} />
-                  <span className="absolute bottom-2 left-2 text-[9px] px-1.5 py-0.5 rounded-full text-white font-medium"
-                    style={{ background: "rgba(0,0,0,0.40)" }}>
-                    {CATEGORY_ICONS[entry.category]}
-                  </span>
-                </div>
-              ) : (
-                <div className="flex items-center justify-center"
-                  style={{ height: 68, background: CAT_GRADIENTS[entry.category] ?? CAT_GRADIENTS["日常"] }}>
-                  <span className="text-3xl" style={{ opacity: 0.6 }}>{CATEGORY_ICONS[entry.category]}</span>
-                </div>
-              )}
-              <div className="px-4 py-3 flex-1 flex flex-col">
-                <div className="flex items-center gap-1.5 mb-1.5">
-                  <span className="text-[13px] font-bold leading-none" style={{ color: "var(--accent)" }}>
-                    {entry.category}
-                  </span>
-                  <span className="text-[11px] text-muted ml-auto whitespace-nowrap">{formatDate(entry.entry_date)}</span>
-                </div>
-                <p className="text-[13px] font-bold text-primary mb-1 leading-snug line-clamp-1">{entry.title}</p>
-                {entry.content && (
-                  <p className="text-[11px] text-muted line-clamp-2 leading-relaxed flex-1 break-words">{entry.content}</p>
+      {entries.map((entry, i) => {
+        const cs = CARD_STYLES[entry.category] ?? CARD_STYLES["日常"];
+        return (
+          <motion.div key={entry.id} custom={i} variants={CARD} initial="hidden" animate="visible">
+            <Link href={`/entries/${entry.id}`}>
+              <div
+                className="overflow-hidden cursor-pointer h-full flex flex-col active:scale-[0.98] transition-transform duration-100 rounded-[20px]"
+                style={{ background: cs.bg, border: `1px solid ${cs.borderColor}`, boxShadow: "var(--card-shadow)", minHeight: 160, touchAction: "manipulation" }}>
+                {entry.image_url ? (
+                  <div className="relative overflow-hidden" style={{ height: 100 }}>
+                    <img src={entry.image_url} alt="" className="w-full h-full object-cover" style={{ opacity: 0.92 }} />
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 35%, rgba(0,0,0,0.4))" }} />
+                    <span className="absolute bottom-2 left-2 text-[9px] px-1.5 py-0.5 rounded-full text-white font-medium"
+                      style={{ background: "rgba(0,0,0,0.40)" }}>
+                      {CATEGORY_ICONS[entry.category]}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center" style={{ height: 64, background: `${cs.accent}22` }}>
+                    <span className="text-3xl" style={{ opacity: 0.7 }}>{CATEGORY_ICONS[entry.category]}</span>
+                  </div>
                 )}
-                <div className="flex items-center justify-end mt-2 pt-2"
-                  style={{ borderTop: "1px solid var(--glass-border)" }}>
-                  <span className="text-[11px] font-semibold flex items-center gap-0.5" style={{ color: "var(--accent)" }}>
-                    詳細 <ArrowRight className="w-2.5 h-2.5" strokeWidth={2.5} />
-                  </span>
+                <div className="px-4 py-3 flex-1 flex flex-col">
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <span className="text-[12px] font-bold leading-none" style={{ color: cs.labelColor }}>
+                      {entry.category}
+                    </span>
+                    <span className="text-[11px] text-muted ml-auto whitespace-nowrap">{formatDate(entry.entry_date)}</span>
+                  </div>
+                  <p className="text-[13px] font-bold text-primary mb-1 leading-snug line-clamp-1">{entry.title}</p>
+                  {entry.content && (
+                    <p className="text-[11px] text-muted line-clamp-2 leading-relaxed flex-1 break-words">{entry.content}</p>
+                  )}
+                  <div className="flex items-center justify-end mt-2 pt-2"
+                    style={{ borderTop: `1px solid ${cs.borderColor}` }}>
+                    <span className="text-[11px] font-semibold flex items-center gap-0.5" style={{ color: cs.accent }}>
+                      詳細 <ArrowRight className="w-2.5 h-2.5" strokeWidth={2.5} />
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </Link>
-        </motion.div>
-      ))}
+            </Link>
+          </motion.div>
+        );
+      })}
     </div>
   );
 }

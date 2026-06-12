@@ -5,8 +5,8 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Plus, ArrowRight, CalendarDays } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { Entry, CATEGORY_ICONS } from "@/lib/types";
-import { formatDate, CAT_GRADIENTS } from "@/lib/utils";
+import { Entry, CATEGORY_ICONS, CARD_STYLES } from "@/lib/types";
+import { formatDate } from "@/lib/utils";
 import type { ReflectionData } from "@/lib/utils";
 import { HomeReflections } from "./HomeReflections";
 
@@ -37,7 +37,7 @@ const TIME_CONFIG: Record<Period, {
   noon: {
     greeting: "こんにちは",
     message: "今の気持ちや出来事を、数年後の自分が読み返せるように残しましょう。",
-    heroGlow: "rgba(251,191,36,0.12)", btnText: "今を記録する",
+    heroGlow: "rgba(251,191,36,0.12)", btnText: "今を記録",
   },
   evening: {
     greeting: "おつかれさまです",
@@ -188,60 +188,61 @@ function HomeCards({ entries, reflection }: { entries: Entry[]; reflection: Refl
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
-            {entries.slice(0, 6).map((entry, i) => (
-              <motion.div key={entry.id}
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: Math.min(i * 0.02, 0.10), duration: 0.14, ease: "easeOut" }}
-              >
-                <Link
-                  href={`/entries/${entry.id}`}
-                  className="glass overflow-hidden flex flex-col h-full active:scale-[0.98] active:opacity-90 transition-transform duration-100 block"
-                  style={{ minHeight: 160, touchAction: "manipulation" }}
+            {entries.slice(0, 6).map((entry, i) => {
+              const cs = CARD_STYLES[entry.category] ?? CARD_STYLES["日常"];
+              return (
+                <motion.div key={entry.id}
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: Math.min(i * 0.02, 0.10), duration: 0.14, ease: "easeOut" }}
                 >
-                  {entry.image_url ? (
-                    <div className="relative overflow-hidden" style={{ height: 100 }}>
-                      <img src={entry.image_url} alt="" className="w-full h-full object-cover"
-                        style={{ opacity: 0.92 }} />
-                      <div className="absolute inset-0 pointer-events-none"
-                        style={{ background: "linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.45))" }} />
-                      <div className="absolute bottom-2 left-3 pointer-events-none">
-                        <span className="text-white text-[10px] font-semibold opacity-90">
+                  <Link
+                    href={`/entries/${entry.id}`}
+                    className="overflow-hidden flex flex-col h-full active:scale-[0.98] active:opacity-90 transition-transform duration-100 block rounded-[20px]"
+                    style={{ minHeight: 160, touchAction: "manipulation", background: cs.bg, border: `1px solid ${cs.borderColor}`, boxShadow: "var(--card-shadow)" }}
+                  >
+                    {entry.image_url ? (
+                      <div className="relative overflow-hidden" style={{ height: 100 }}>
+                        <img src={entry.image_url} alt="" className="w-full h-full object-cover"
+                          style={{ opacity: 0.92 }} />
+                        <div className="absolute inset-0 pointer-events-none"
+                          style={{ background: "linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.45))" }} />
+                        <div className="absolute bottom-2 left-3 pointer-events-none">
+                          <span className="text-white text-[10px] font-semibold opacity-90">
+                            {CATEGORY_ICONS[entry.category]}
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center" style={{ height: 64, background: `${cs.accent}22` }}>
+                        <span className="text-3xl" style={{ opacity: 0.7 }}>
                           {CATEGORY_ICONS[entry.category]}
                         </span>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center relative overflow-hidden" style={{ height: 68 }}>
-                      <div className="absolute inset-0 pointer-events-none"
-                        style={{ background: CAT_GRADIENTS[entry.category] ?? CAT_GRADIENTS["日常"] }} />
-                      <span className="relative text-3xl pointer-events-none" style={{ opacity: 0.55 }}>
-                        {CATEGORY_ICONS[entry.category]}
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="px-4 py-3 flex-1 flex flex-col">
-                    <div className="flex items-center gap-1.5 mb-1.5">
-                      <span className="text-[13px] font-bold leading-none" style={{ color: "var(--accent)" }}>
-                        {entry.category}
-                      </span>
-                      <span className="text-[11px] text-muted ml-auto whitespace-nowrap">{formatDate(entry.entry_date)}</span>
-                    </div>
-                    <p className="text-[13px] font-bold text-primary leading-snug line-clamp-1 mb-1">{entry.title}</p>
-                    {entry.content && (
-                      <p className="text-[11px] text-muted line-clamp-2 leading-relaxed flex-1 break-words">{entry.content}</p>
                     )}
-                    <div className="flex items-center justify-end mt-2 pt-2"
-                      style={{ borderTop: "1px solid var(--glass-border)" }}>
-                      <span className="text-[11px] font-semibold flex items-center gap-0.5" style={{ color: "var(--accent)" }}>
-                        続きを読む <ArrowRight style={{ width: 9, height: 9 }} strokeWidth={2.5} />
-                      </span>
+
+                    <div className="px-4 py-3 flex-1 flex flex-col">
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        <span className="text-[12px] font-bold leading-none" style={{ color: cs.labelColor }}>
+                          {entry.category}
+                        </span>
+                        <span className="text-[11px] text-muted ml-auto whitespace-nowrap">{formatDate(entry.entry_date)}</span>
+                      </div>
+                      <p className="text-[13px] font-bold text-primary leading-snug line-clamp-1 mb-1">{entry.title}</p>
+                      {entry.content && (
+                        <p className="text-[11px] text-muted line-clamp-2 leading-relaxed flex-1 break-words">{entry.content}</p>
+                      )}
+                      <div className="flex items-center justify-end mt-2 pt-2"
+                        style={{ borderTop: `1px solid ${cs.borderColor}` }}>
+                        <span className="text-[11px] font-semibold flex items-center gap-0.5" style={{ color: cs.accent }}>
+                          続きを読む <ArrowRight style={{ width: 9, height: 9 }} strokeWidth={2.5} />
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
+                  </Link>
+                </motion.div>
+              );
+            })}
           </div>
         )}
       </div>

@@ -30,6 +30,24 @@ export const CATEGORY_COLORS: Record<Category, string> = {
   思い出: "bg-pink-100 text-pink-700",
 };
 
+export interface CardStyle {
+  bg: string;
+  accent: string;
+  labelColor: string;
+  borderColor: string;
+}
+
+export const CARD_STYLES: Record<Category, CardStyle> = {
+  日常:    { bg: "#EFF8FF", accent: "#0EA5E9", labelColor: "#0369A1", borderColor: "#BAE6FD" },
+  健康:    { bg: "#ECFDF5", accent: "#10B981", labelColor: "#065F46", borderColor: "#A7F3D0" },
+  仕事:    { bg: "#EEF2FF", accent: "#3B82F6", labelColor: "#1E40AF", borderColor: "#BFDBFE" },
+  学習:    { bg: "#F5F3FF", accent: "#8B5CF6", labelColor: "#5B21B6", borderColor: "#DDD6FE" },
+  お金:    { bg: "#FFFBEB", accent: "#F59E0B", labelColor: "#B45309", borderColor: "#FCD34D" },
+  人間関係:{ bg: "#FFF1F2", accent: "#F43F5E", labelColor: "#9F1239", borderColor: "#FECDD3" },
+  アイデア:{ bg: "#FFF7ED", accent: "#F97316", labelColor: "#C2410C", borderColor: "#FED7AA" },
+  思い出:  { bg: "#FDF4FF", accent: "#A855F7", labelColor: "#6B21A8", borderColor: "#E9D5FF" },
+};
+
 export const CATEGORY_ICONS: Record<Category, string> = {
   日常: "☀️",
   健康: "💚",

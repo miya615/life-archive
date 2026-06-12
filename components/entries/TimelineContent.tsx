@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Plus, ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { type Entry, CATEGORY_ICONS } from "@/lib/types";
+import { type Entry, CATEGORY_ICONS, CARD_STYLES } from "@/lib/types";
 
 const MONTHS_JP = ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"];
 
@@ -129,12 +129,14 @@ export function TimelineContent() {
                     </div>
 
                     <div className="ml-6 grid grid-cols-2 xl:grid-cols-3 gap-3">
-                      {me.map((entry) => (
+                      {me.map((entry) => {
+                        const cs = CARD_STYLES[entry.category] ?? CARD_STYLES["日常"];
+                        return (
                         <Link key={entry.id} href={`/entries/${entry.id}`}>
                           <div
-                            className="glass overflow-hidden cursor-pointer flex h-full active:scale-[0.98] transition-transform duration-100"
-                            style={{ boxShadow: "var(--card-shadow)", minHeight: 80, touchAction: "manipulation" }}>
-                            <div className="w-1.5 flex-shrink-0" style={{ background: "linear-gradient(to bottom, var(--accent), var(--accent-dark))" }} />
+                            className="overflow-hidden cursor-pointer flex h-full active:scale-[0.98] transition-transform duration-100 rounded-[16px]"
+                            style={{ background: cs.bg, border: `1px solid ${cs.borderColor}`, boxShadow: "var(--card-shadow)", minHeight: 80, touchAction: "manipulation" }}>
+                            <div className="w-1 flex-shrink-0 rounded-l-[16px]" style={{ background: cs.accent }} />
                             <div className="flex-1 p-4">
                               <div className="flex items-start gap-3">
                                 {entry.image_url ? (
@@ -143,13 +145,13 @@ export function TimelineContent() {
                                   </div>
                                 ) : (
                                   <div className="w-14 h-14 rounded-xl flex-shrink-0 flex items-center justify-center"
-                                    style={{ background: "var(--glass-strong-bg)" }}>
+                                    style={{ background: `${cs.accent}22` }}>
                                     <span className="text-2xl">{CATEGORY_ICONS[entry.category]}</span>
                                   </div>
                                 )}
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-1.5 mb-1 flex-wrap">
-                                    <span className="text-[13px] font-bold leading-none" style={{ color: "var(--accent)" }}>
+                                    <span className="text-[12px] font-bold leading-none" style={{ color: cs.labelColor }}>
                                       {entry.category}
                                     </span>
                                     <span className="text-[11px] text-muted">{Number(entry.entry_date.split("-")[2])}日</span>
@@ -159,7 +161,7 @@ export function TimelineContent() {
                                     <p className="text-xs text-muted mt-0.5 line-clamp-2 leading-relaxed">{entry.content}</p>
                                   )}
                                   <div className="flex items-center gap-1 mt-2">
-                                    <span className="text-[11px] font-semibold text-accent flex items-center gap-0.5">
+                                    <span className="text-[11px] font-semibold flex items-center gap-0.5" style={{ color: cs.accent }}>
                                       詳細 <ArrowRight className="w-2.5 h-2.5" />
                                     </span>
                                   </div>
@@ -168,7 +170,8 @@ export function TimelineContent() {
                             </div>
                           </div>
                         </Link>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 ))}
