@@ -68,7 +68,8 @@ export function HomeContent() {
     async function load() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user || !mounted) return;
+      if (!user) return null
+      if (!mounted) return null
 
       const now = new Date();
       const today = now.toISOString().split("T")[0];
