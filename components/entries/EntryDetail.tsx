@@ -4,15 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, Edit2, Trash2, AlertTriangle, X } from "lucide-react";
 import { Entry, CATEGORY_ICONS } from "@/lib/types";
 
 function formatDate(dateStr: string) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString("ja-JP", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    weekday: "long",
+  return new Date(dateStr).toLocaleDateString("ja-JP", {
+    year: "numeric", month: "long", day: "numeric", weekday: "long",
   });
 }
 
@@ -26,101 +24,118 @@ export function EntryDetail({ entry }: { entry: Entry }) {
     const supabase = createClient();
     if (entry.image_url) {
       const path = entry.image_url.split("/entry-images/")[1];
-      if (path) {
-        await supabase.storage.from("entry-images").remove([path]);
-      }
+      if (path) await supabase.storage.from("entry-images").remove([path]);
     }
     await supabase.from("entries").delete().eq("id", entry.id);
     router.push("/entries");
   }
 
   return (
-    <div className="py-8 animate-fade-up relative z-10">
-      {/* Back */}
+    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="max-w-2xl">
+      {/* Toolbar */}
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={() => router.back()}
-          className="w-9 h-9 glass rounded-2xl flex items-center justify-center shadow-lg shadow-black/20"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4 text-white/70">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-          </svg>
+          className="w-11 h-11 glass rounded-2xl flex items-center justify-center active:scale-[0.93] active:opacity-80 transition-transform duration-100"
+          style={{ touchAction: "manipulation" }}>
+          <ArrowLeft className="w-4 h-4 text-secondary" strokeWidth={2} />
         </button>
         <div className="flex gap-2">
-          <Link href={`/entries/${entry.id}/edit`}>
-            <div className="h-9 px-4 glass rounded-2xl flex items-center shadow-sm text-sm font-medium text-secondary">
-              編集
-            </div>
+          <Link href={`/entries/${entry.id}/edit`}
+            className="flex items-center gap-2 h-11 px-4 glass rounded-2xl text-sm font-medium text-secondary active:scale-[0.95] active:opacity-80 transition-transform duration-100"
+            style={{ touchAction: "manipulation" }}>
+            <Edit2 className="w-3.5 h-3.5" /> 編集
           </Link>
           <button
             onClick={() => setShowConfirm(true)}
-            className="h-9 px-4 bg-red-500/15 border border-red-500/20 rounded-2xl flex items-center text-sm font-medium text-red-400"
-          >
-            削除
+            className="flex items-center gap-2 h-11 px-4 rounded-2xl text-sm font-medium active:scale-[0.95] active:opacity-80 transition-transform duration-100"
+            style={{ background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.2)", touchAction: "manipulation" }}>
+            <Trash2 className="w-3.5 h-3.5" /> 削除
           </button>
         </div>
       </div>
 
       {/* Image */}
       {entry.image_url && (
-        <div className="rounded-3xl overflow-hidden mb-5 shadow-2xl shadow-black/40">
-          <img src={entry.image_url} alt="" className="w-full max-h-72 object-cover opacity-90" />
-        </div>
+        <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}
+          className="rounded-3xl overflow-hidden mb-5 shadow-2xl" style={{ boxShadow: "0 16px 48px rgba(0,0,0,0.4)" }}>
+          <img src={entry.image_url} alt="" className="w-full max-h-80 object-cover opacity-90" />
+        </motion.div>
       )}
 
-      {/* Content card */}
-      <div className="glass-strong rounded-3xl p-6 shadow-2xl shadow-black/30 space-y-4">
+      {/* Content */}
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}
+        className="glass-strong p-6 lg:p-8 space-y-5"
+        style={{ boxShadow: "var(--card-shadow)" }}
+      >
         {/* Meta */}
-        <div className="flex items-center gap-3">
-          <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-white/10 text-violet-300 border border-white/10">
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="text-xs px-3 py-1 rounded-full font-medium"
+            style={{ background: "var(--glass-bg)", color: "var(--accent)", border: "1px solid var(--glass-border)" }}>
             {CATEGORY_ICONS[entry.category]} {entry.category}
           </span>
           <span className="text-xs text-muted">{formatDate(entry.entry_date)}</span>
         </div>
 
         {/* Title */}
-        <h1 className="text-xl font-bold text-primary leading-snug">{entry.title}</h1>
+        <h1 className="text-xl lg:text-2xl font-bold text-primary leading-snug">{entry.title}</h1>
+
+        {/* Divider */}
+        <div className="h-px" style={{ background: "var(--glass-border)" }} />
 
         {/* Content */}
         {entry.content && (
-          <p className="text-sm text-secondary leading-relaxed whitespace-pre-wrap">{entry.content}</p>
+          <p className="text-sm lg:text-base text-secondary leading-relaxed whitespace-pre-wrap">{entry.content}</p>
         )}
 
         {/* Timestamps */}
-        <div className="pt-3 border-t border-white/8">
+        <div className="pt-2" style={{ borderTop: "1px solid var(--glass-border)" }}>
           <p className="text-[10px] text-muted">
             作成: {new Date(entry.created_at).toLocaleDateString("ja-JP")}
-            {entry.updated_at !== entry.created_at && (
-              <> ・ 更新: {new Date(entry.updated_at).toLocaleDateString("ja-JP")}</>
-            )}
+            {entry.updated_at !== entry.created_at && <> ・ 更新: {new Date(entry.updated_at).toLocaleDateString("ja-JP")}</>}
           </p>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Delete confirm */}
-      {showConfirm && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-end justify-center z-50 p-4">
-          <div className="glass-strong rounded-3xl p-6 w-full max-w-sm shadow-2xl">
-            <h3 className="text-base font-semibold text-primary mb-2">記録を削除しますか？</h3>
-            <p className="text-sm text-muted mb-5">この操作は取り消せません。</p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowConfirm(false)}
-                className="flex-1 py-3 glass rounded-2xl text-sm font-medium text-secondary"
-              >
-                キャンセル
-              </button>
-              <button
-                onClick={handleDelete}
-                disabled={deleting}
-                className="flex-1 py-3 bg-red-500 rounded-2xl text-sm font-medium text-white disabled:opacity-60 shadow-lg shadow-red-500/30"
-              >
-                {deleting ? "削除中..." : "削除する"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+      {/* Delete modal */}
+      <AnimatePresence>
+        {showConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
+            style={{ background: "rgba(0,0,0,0.75)" }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
+              className="glass-strong w-full max-w-sm p-6"
+              style={{ boxShadow: "0 24px 64px rgba(0,0,0,0.5)" }}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.2)" }}>
+                  <AlertTriangle className="w-5 h-5" style={{ color: "#f87171" }} />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-primary">記録を削除しますか？</h3>
+                  <p className="text-xs text-muted">この操作は取り消せません。</p>
+                </div>
+              </div>
+              <div className="flex gap-3 mt-5">
+                <button onClick={() => setShowConfirm(false)}
+                  className="flex-1 py-3 glass rounded-2xl text-sm font-medium text-secondary flex items-center justify-center gap-1.5 active:scale-[0.95] active:opacity-80 transition-transform duration-100"
+                  style={{ touchAction: "manipulation" }}>
+                  <X className="w-4 h-4" /> キャンセル
+                </button>
+                <button onClick={handleDelete} disabled={deleting}
+                  className="flex-1 py-3 rounded-2xl text-sm font-medium text-white flex items-center justify-center gap-1.5 disabled:opacity-60 active:scale-[0.95] active:opacity-90 transition-transform duration-100"
+                  style={{ background: "#ef4444", boxShadow: "0 4px 16px rgba(239,68,68,0.3)", touchAction: "manipulation" }}>
+                  <Trash2 className="w-4 h-4" /> {deleting ? "削除中..." : "削除する"}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }

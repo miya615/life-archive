@@ -1,6 +1,5 @@
 export const dynamic = "force-dynamic";
 import { createClient } from "@/lib/supabase/server";
-import { AppShell } from "@/components/layout/AppShell";
 import { NewEntryForm } from "@/components/entries/NewEntryForm";
 import { notFound } from "next/navigation";
 
@@ -11,9 +10,7 @@ export default async function EditEntryPage({
 }) {
   const { id } = await params;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
   const { data: entry } = await supabase
     .from("entries")
@@ -24,9 +21,5 @@ export default async function EditEntryPage({
 
   if (!entry) notFound();
 
-  return (
-    <AppShell>
-      <NewEntryForm editEntry={entry} />
-    </AppShell>
-  );
+  return <NewEntryForm editEntry={entry} />;
 }

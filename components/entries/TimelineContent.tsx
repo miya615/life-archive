@@ -1,19 +1,17 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Entry, CATEGORY_ICONS } from "@/lib/types";
+import { motion } from "framer-motion";
+import { Plus, ArrowRight } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { type Entry, CATEGORY_ICONS } from "@/lib/types";
 
-const MONTHS_JP = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
+const MONTHS_JP = ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"];
 
-type GroupedEntries = {
-  year: number;
-  months: {
-    month: number;
-    entries: Entry[];
-  }[];
-}[];
+type Grouped = { year: number; months: { month: number; entries: Entry[] }[] }[];
 
-function groupByYearMonth(entries: Entry[]): GroupedEntries {
+function groupByYearMonth(entries: Entry[]): Grouped {
   const map = new Map<string, Entry[]>();
   for (const e of entries) {
     const [y, m] = e.entry_date.split("-");
@@ -27,92 +25,156 @@ function groupByYearMonth(entries: Entry[]): GroupedEntries {
     if (!years.has(y)) years.set(y, new Map());
     years.get(y)!.set(m, ents);
   }
-  return [...years.entries()]
-    .sort(([a], [b]) => b - a)
-    .map(([year, monthMap]) => ({
-      year,
-      months: [...monthMap.entries()]
-        .sort(([a], [b]) => b - a)
-        .map(([month, entries]) => ({ month, entries })),
-    }));
+  return [...years.entries()].sort(([a], [b]) => b - a).map(([year, monthMap]) => ({
+    year,
+    months: [...monthMap.entries()].sort(([a], [b]) => b - a).map(([month, entries]) => ({ month, entries })),
+  }));
 }
 
-export function TimelineContent({ entries }: { entries: Entry[] }) {
+function TimelineSkeleton() {
+  return (
+    <div className="space-y-10 animate-pulse">
+      {[0, 1].map((i) => (
+        <div key={i} className="space-y-4">
+          <div className="flex items-center gap-5">
+            <div className="w-16 h-16 rounded-3xl bg-slate-100 flex-shrink-0" />
+            <div className="flex-1 h-px bg-slate-100" />
+          </div>
+          <div className="ml-10 grid grid-cols-2 gap-3">
+            {[0, 1, 2, 3].map((j) => (
+              <div key={j} className="h-24 rounded-[20px] bg-slate-100" />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function TimelineContent() {
+  const [entries, setEntries] = useState<Entry[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) { if (mounted) { setEntries([]); } return; }
+        const { data } = await supabase
+          .from("entries").select("*")
+          .eq("user_id", user.id)
+          .order("entry_date", { ascending: false });
+        if (mounted) setEntries(data ?? []);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+    load();
+    return () => { mounted = false; };
+  }, []);
+
   const grouped = groupByYearMonth(entries);
 
   return (
-    <div className="py-8 animate-fade-up relative z-10">
-      <h1 className="text-xl font-bold text-primary mb-6">人生年表</h1>
+    <div className="space-y-6 lg:space-y-8">
+      {/* ヘッダーは即時表示 */}
+      <div>
+        <h1 className="text-2xl lg:text-3xl xl:text-4xl font-bold text-primary">人生年表</h1>
+        <p className="text-sm text-muted mt-1">あなたの歩みを時系列で振り返る</p>
+      </div>
 
-      {grouped.length === 0 ? (
-        <div className="glass rounded-3xl p-10 text-center shadow-xl shadow-black/20">
-          <p className="text-4xl mb-3">✦</p>
-          <p className="text-sm text-muted">まだ記録がありません</p>
-          <Link href="/entries/new" className="inline-block mt-4 text-sm text-violet-400 font-medium">
-            最初の記録を追加 →
+      {loading ? (
+        <TimelineSkeleton />
+      ) : grouped.length === 0 ? (
+        <div className="glass p-16 text-center">
+          <p className="text-5xl mb-4">✦</p>
+          <p className="text-base text-muted mb-6">まだ記録がありません</p>
+          <Link href="/entries/new"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-white text-sm font-semibold active:scale-95 transition-transform duration-100"
+            style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-dark))", boxShadow: "0 4px 20px var(--accent-glow)", touchAction: "manipulation" }}>
+            <Plus className="w-4 h-4" /> 最初の記録を追加
           </Link>
         </div>
       ) : (
-        <div className="space-y-8">
+        <div className="space-y-14">
           {grouped.map(({ year, months }) => (
-            <div key={year}>
-              {/* Year marker */}
-              <div className="flex items-center gap-3 mb-5">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-700 flex items-center justify-center shadow-xl shadow-violet-700/40 flex-shrink-0">
-                  <span className="text-white text-xs font-bold leading-tight text-center">{year}</span>
+            <motion.div key={year}
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.14 }}>
+              <div className="flex items-center gap-5 mb-8">
+                <div
+                  className="rounded-3xl flex items-center justify-center flex-shrink-0"
+                  style={{ width: 64, height: 64, background: "linear-gradient(135deg, var(--accent), var(--accent-dark))", boxShadow: "0 6px 24px var(--accent-glow)" }}>
+                  <span className="text-white text-base font-bold">{year}</span>
                 </div>
-                <div className="h-px flex-1 bg-gradient-to-r from-violet-500/40 to-transparent" />
+                <div className="flex-1">
+                  <div className="h-px" style={{ background: "linear-gradient(90deg, var(--accent), transparent)" }} />
+                  <p className="text-xs text-muted mt-1.5">
+                    {months.reduce((acc, m) => acc + m.entries.length, 0)}件の記録
+                  </p>
+                </div>
               </div>
 
-              {months.map(({ month, entries: monthEntries }) => (
-                <div key={month} className="ml-7 mb-6">
-                  {/* Month */}
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-1.5 h-1.5 rounded-full bg-violet-400 flex-shrink-0" />
-                    <span className="text-xs font-semibold text-secondary">
-                      {MONTHS_JP[month - 1]}
-                      <span className="text-muted font-normal ml-1">({monthEntries.length}件)</span>
-                    </span>
-                  </div>
+              <div className="ml-10 lg:ml-14 space-y-8">
+                {months.map(({ month, entries: me }) => (
+                  <div key={month}>
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: "var(--accent)" }} />
+                      <span className="text-sm font-bold text-secondary">
+                        {MONTHS_JP[month - 1]}
+                        <span className="text-muted font-normal ml-2 text-xs">（{me.length}件）</span>
+                      </span>
+                      <div className="h-px flex-1" style={{ background: "var(--glass-border)" }} />
+                    </div>
 
-                  {/* Entries */}
-                  <div className="ml-4 space-y-3">
-                    {monthEntries.map((entry) => (
-                      <Link key={entry.id} href={`/entries/${entry.id}`}>
-                        <div className="glass rounded-2xl overflow-hidden shadow-xl shadow-black/20 active:scale-[0.98] transition-transform flex">
-                          <div className="w-1 bg-gradient-to-b from-violet-500/60 to-indigo-500/30 flex-shrink-0" />
-                          <div className="flex-1 p-3">
-                            <div className="flex items-start gap-3">
-                              {entry.image_url && (
-                                <img
-                                  src={entry.image_url}
-                                  alt=""
-                                  className="w-14 h-14 rounded-xl object-cover flex-shrink-0 opacity-90"
-                                />
-                              )}
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-1.5 mb-1">
-                                  <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium bg-white/10 text-violet-300 border border-white/10">
-                                    {CATEGORY_ICONS[entry.category]} {entry.category}
-                                  </span>
-                                  <span className="text-[9px] text-muted">
-                                    {Number(entry.entry_date.split("-")[2])}日
-                                  </span>
-                                </div>
-                                <p className="text-sm font-semibold text-primary leading-snug">{entry.title}</p>
-                                {entry.content && (
-                                  <p className="text-xs text-muted mt-0.5 line-clamp-1">{entry.content}</p>
+                    <div className="ml-6 grid grid-cols-2 xl:grid-cols-3 gap-3">
+                      {me.map((entry) => (
+                        <Link key={entry.id} href={`/entries/${entry.id}`}>
+                          <div
+                            className="glass overflow-hidden cursor-pointer flex h-full active:scale-[0.98] transition-transform duration-100"
+                            style={{ boxShadow: "var(--card-shadow)", minHeight: 80, touchAction: "manipulation" }}>
+                            <div className="w-1.5 flex-shrink-0" style={{ background: "linear-gradient(to bottom, var(--accent), var(--accent-dark))" }} />
+                            <div className="flex-1 p-4">
+                              <div className="flex items-start gap-3">
+                                {entry.image_url ? (
+                                  <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0">
+                                    <img src={entry.image_url} alt="" className="w-full h-full object-cover opacity-90" />
+                                  </div>
+                                ) : (
+                                  <div className="w-14 h-14 rounded-xl flex-shrink-0 flex items-center justify-center"
+                                    style={{ background: "var(--glass-strong-bg)" }}>
+                                    <span className="text-2xl">{CATEGORY_ICONS[entry.category]}</span>
+                                  </div>
                                 )}
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                                    <span className="text-[13px] font-bold leading-none" style={{ color: "var(--accent)" }}>
+                                      {entry.category}
+                                    </span>
+                                    <span className="text-[11px] text-muted">{Number(entry.entry_date.split("-")[2])}日</span>
+                                  </div>
+                                  <p className="text-sm font-bold text-primary leading-snug">{entry.title}</p>
+                                  {entry.content && (
+                                    <p className="text-xs text-muted mt-0.5 line-clamp-2 leading-relaxed">{entry.content}</p>
+                                  )}
+                                  <div className="flex items-center gap-1 mt-2">
+                                    <span className="text-[11px] font-semibold text-accent flex items-center gap-0.5">
+                                      詳細 <ArrowRight className="w-2.5 h-2.5" />
+                                    </span>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </Link>
-                    ))}
+                        </Link>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            </motion.div>
           ))}
         </div>
       )}

@@ -1,6 +1,5 @@
 export const dynamic = "force-dynamic";
 import { createClient } from "@/lib/supabase/server";
-import { AppShell } from "@/components/layout/AppShell";
 import { EntryDetail } from "@/components/entries/EntryDetail";
 import { notFound } from "next/navigation";
 
@@ -11,9 +10,7 @@ export default async function EntryDetailPage({
 }) {
   const { id } = await params;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
   const { data: entry } = await supabase
     .from("entries")
@@ -24,9 +21,5 @@ export default async function EntryDetailPage({
 
   if (!entry) notFound();
 
-  return (
-    <AppShell>
-      <EntryDetail entry={entry} />
-    </AppShell>
-  );
+  return <EntryDetail entry={entry} />;
 }
