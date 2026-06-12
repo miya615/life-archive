@@ -272,7 +272,7 @@ function HomeCards({ entries, reflection }: { entries: Entry[]; reflection: Refl
                       </div>
                     )}
 
-                    <div className="px-3 pt-2.5 pb-3 flex flex-col gap-1.5">
+                    <div className="px-4 pt-3 pb-4 flex flex-col gap-2">
                       <div className="flex items-center gap-1.5">
                         <span className="text-[11px] font-bold leading-none" style={{ color: cs.labelColor }}>
                           {entry.category}
