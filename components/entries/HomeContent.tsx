@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { Plus, ArrowRight, CalendarDays } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Entry, CATEGORY_ICONS } from "@/lib/types";
-import { formatDate, CAT_GRADIENTS, getDailyQuote } from "@/lib/utils";
+import { formatDate, CAT_GRADIENTS } from "@/lib/utils";
 import type { ReflectionData } from "@/lib/utils";
 import { HomeReflections } from "./HomeReflections";
 
@@ -95,13 +95,12 @@ function TodayHero({ displayName, todayCount, monthCount }: {
         }} />
 
         <div className="relative">
-          {displayName && (
+          {displayName ? (
             <h1 className="font-bold text-primary leading-tight mb-4"
               style={{ fontSize: "clamp(28px, 5vw, 46px)" }}>
               {displayName}さん
             </h1>
-          )}
-          {!displayName && (
+          ) : (
             <div className="h-10 w-40 rounded-2xl bg-slate-100 animate-pulse mb-4" />
           )}
           <p className="text-[15px] lg:text-[17px] text-secondary leading-relaxed mb-8 max-w-lg"
@@ -148,10 +147,6 @@ function HomeSkeleton() {
         {[0, 1, 2, 3].map((i) => (
           <div key={i} className="rounded-[20px] bg-slate-100" style={{ height: 160 }} />
         ))}
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="rounded-[20px] bg-slate-100" style={{ height: 100 }} />
-        <div className="rounded-[20px] bg-slate-100" style={{ height: 100 }} />
       </div>
     </div>
   );
@@ -277,9 +272,6 @@ export function HomeContent() {
         const mm = pad(now.getMonth() + 1);
         const dd = pad(now.getDate());
         const thisYear = now.getFullYear();
-        const weekAgo = new Date(now);
-        weekAgo.setDate(weekAgo.getDate() - 7);
-        const weekAgoStr = weekAgo.toISOString().split("T")[0];
 
         const [
           { data: recentEntries },
@@ -287,28 +279,15 @@ export function HomeContent() {
           { count: todayCount },
           { data: profile },
           { data: oneYearAgo },
-          { count: weekCount },
-          { data: weekEntries },
         ] = await Promise.all([
           supabase.from("entries").select("*").eq("user_id", user.id).order("entry_date", { ascending: false }).limit(8),
           supabase.from("entries").select("*", { count: "exact", head: true }).eq("user_id", user.id).gte("entry_date", startOfMonth),
           supabase.from("entries").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("entry_date", today),
           supabase.from("profiles").select("display_name").eq("id", user.id).single(),
           supabase.from("entries").select("*").eq("user_id", user.id).like("entry_date", `%-${mm}-${dd}`).neq("entry_date", `${thisYear}-${mm}-${dd}`).order("entry_date", { ascending: false }).limit(2),
-          supabase.from("entries").select("*", { count: "exact", head: true }).eq("user_id", user.id).gte("entry_date", weekAgoStr),
-          supabase.from("entries").select("category").eq("user_id", user.id).gte("entry_date", weekAgoStr),
         ]);
 
         if (!mounted) return;
-
-        const catMap: Record<string, number> = {};
-        for (const r of weekEntries ?? []) {
-          catMap[r.category] = (catMap[r.category] ?? 0) + 1;
-        }
-        const weekTopCategories = Object.entries(catMap)
-          .sort(([, a], [, b]) => b - a)
-          .slice(0, 3)
-          .map(([cat, count]) => ({ cat, count }));
 
         setData({
           entries: recentEntries ?? [],
@@ -317,9 +296,6 @@ export function HomeContent() {
           displayName: profile?.display_name ?? user.email?.split("@")[0] ?? "",
           reflection: {
             oneYearAgo: oneYearAgo ?? [],
-            weekCount: weekCount ?? 0,
-            weekTopCategories,
-            quote: getDailyQuote(now),
           },
         });
       } finally {
