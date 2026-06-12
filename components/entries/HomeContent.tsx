@@ -17,39 +17,83 @@ function todayFormatted() {
 }
 
 type Period = "morning" | "noon" | "evening" | "night";
-function getPeriod(): Period {
-  const h = new Date().getHours();
-  if (h >= 5  && h < 10) return "morning";
-  if (h >= 10 && h < 17) return "noon";
-  if (h >= 17 && h < 21) return "evening";
-  return "night";
+
+interface TimeTheme {
+  greeting: string;
+  message: string;
+  btnText: string;
+  background: string;
+  textColor: string;
+  subTextColor: string;
+  accentColor: string;
+  ctaBackground: string;
+  glow: string;
+  /** decorative radial highlight position & color */
+  glowOrb: string;
+  isNight: boolean;
 }
 
-const TIME_CONFIG: Record<Period, {
-  greeting: string; message: string;
-  heroGlow: string; btnText: string;
-}> = {
+const TIME_THEMES: Record<Period, TimeTheme> = {
   morning: {
     greeting: "おはようございます",
     message: "今朝の気持ちや決意を、未来の自分への手紙として残しておきましょう。",
-    heroGlow: "rgba(56,189,248,0.12)", btnText: "今日を記録する",
+    btnText: "今日を記録する",
+    background: "linear-gradient(135deg, #FFF7E6 0%, #EAF6FF 55%, #FFF1C7 100%)",
+    textColor: "#0F172A",
+    subTextColor: "#64748B",
+    accentColor: "#F59E0B",
+    ctaBackground: "linear-gradient(135deg, #F59E0B 0%, #F97316 100%)",
+    glow: "0 20px 60px rgba(245,158,11,0.20)",
+    glowOrb: "radial-gradient(ellipse 55% 180% at 90% -10%, rgba(251,191,36,0.22) 0%, transparent 70%)",
+    isNight: false,
   },
   noon: {
     greeting: "こんにちは",
     message: "今の気持ちや出来事を、数年後の自分が読み返せるように残しましょう。",
-    heroGlow: "rgba(251,191,36,0.12)", btnText: "今を記録",
+    btnText: "今を記録",
+    background: "linear-gradient(135deg, #FFFFFF 0%, #EEF7FF 45%, #FFE8B8 100%)",
+    textColor: "#0F172A",
+    subTextColor: "#64748B",
+    accentColor: "#F97316",
+    ctaBackground: "linear-gradient(135deg, #F97316 0%, #FB923C 100%)",
+    glow: "0 20px 60px rgba(249,115,22,0.18)",
+    glowOrb: "radial-gradient(ellipse 55% 180% at 90% -10%, rgba(249,115,22,0.18) 0%, transparent 70%)",
+    isNight: false,
   },
   evening: {
     greeting: "おつかれさまです",
     message: "何気ない1日も、未来の自分には大切な記録です。今日を静かに残しましょう。",
-    heroGlow: "rgba(244,114,182,0.10)", btnText: "今日を残す",
+    btnText: "今日を残す",
+    background: "linear-gradient(135deg, #FFF0D9 0%, #FDBA74 50%, #E9D5FF 100%)",
+    textColor: "#111827",
+    subTextColor: "#6B7280",
+    accentColor: "#EA580C",
+    ctaBackground: "linear-gradient(135deg, #EA580C 0%, #F97316 100%)",
+    glow: "0 24px 70px rgba(234,88,12,0.25)",
+    glowOrb: "radial-gradient(ellipse 55% 180% at 88% -5%, rgba(253,186,116,0.35) 0%, transparent 68%)",
+    isNight: false,
   },
   night: {
     greeting: "おかえり",
     message: "一日の終わりに、今日の記憶を静かに残しましょう。眠る前のほんの数分で。",
-    heroGlow: "rgba(139,124,248,0.12)", btnText: "今日の記憶を残す",
+    btnText: "今日の記憶を残す",
+    background: "linear-gradient(135deg, #0F172A 0%, #312E81 55%, #1E1B4B 100%)",
+    textColor: "#F8FAFC",
+    subTextColor: "#CBD5E1",
+    accentColor: "#A78BFA",
+    ctaBackground: "linear-gradient(135deg, #F59E0B 0%, #FDBA74 100%)",
+    glow: "0 24px 80px rgba(167,139,250,0.25)",
+    glowOrb: "radial-gradient(ellipse 55% 180% at 88% -5%, rgba(167,139,250,0.28) 0%, transparent 68%)",
+    isNight: true,
   },
 };
+
+function getTimeTheme(hour: number): TimeTheme {
+  if (hour >= 5  && hour < 11) return TIME_THEMES.morning;
+  if (hour >= 11 && hour < 16) return TIME_THEMES.noon;
+  if (hour >= 16 && hour < 19) return TIME_THEMES.evening;
+  return TIME_THEMES.night;
+}
 
 interface HomeData {
   entries: Entry[];
@@ -61,76 +105,79 @@ interface HomeData {
 
 /* ── サブコンポーネント ── */
 
-function HomeHeader() {
-  const period = getPeriod();
-  const { greeting } = TIME_CONFIG[period];
+function HomeHeader({ theme }: { theme: TimeTheme }) {
   return (
     <div className="px-5 pt-6 pb-2">
       <p className="text-[11px] text-muted font-medium tracking-wide">{todayFormatted()}</p>
-      <p className="text-[13px] text-muted mt-1">{greeting}</p>
+      <p className="text-[13px] text-muted mt-1">{theme.greeting}</p>
     </div>
   );
 }
 
-function TodayHero({ displayName, todayCount, monthCount }: {
+function TodayHero({ displayName, todayCount, monthCount, theme }: {
   displayName: string;
   todayCount: number;
   monthCount: number;
+  theme: TimeTheme;
 }) {
-  const period = getPeriod();
-  const { message, heroGlow, btnText } = TIME_CONFIG[period];
-
   return (
     <div className="mx-4 mb-6">
       <div
-        className="glass-strong relative overflow-hidden"
+        className="relative overflow-hidden"
         style={{
           padding: "clamp(28px, 5vw, 52px)",
-          boxShadow: `0 20px 60px ${heroGlow}, 0 1px 0 rgba(255,255,255,0.07) inset`,
+          background: theme.background,
+          borderRadius: 28,
+          border: "1px solid rgba(255,255,255,0.5)",
+          boxShadow: theme.glow,
         }}
       >
-        <div className="absolute pointer-events-none" style={{
-          top: "-20%", right: "-10%", width: "55%", height: "180%",
-          background: `radial-gradient(ellipse, ${heroGlow} 0%, transparent 68%)`,
-        }} />
+        {/* decorative glow orb */}
+        <div className="absolute pointer-events-none inset-0" style={{ background: theme.glowOrb }} />
+        {/* inner top highlight */}
+        <div className="absolute pointer-events-none inset-x-0 top-0 h-px" style={{ background: "rgba(255,255,255,0.6)" }} />
 
         <div className="relative">
           {displayName ? (
-            <h1 className="font-bold text-primary leading-tight mb-4"
-              style={{ fontSize: "clamp(28px, 5vw, 46px)" }}>
+            <h1 className="font-bold leading-tight mb-4"
+              style={{ fontSize: "clamp(28px, 5vw, 46px)", color: theme.textColor }}>
               {displayName}さん
             </h1>
           ) : (
-            <div className="h-10 w-40 rounded-2xl bg-slate-100 animate-pulse mb-4" />
+            <div className="h-10 w-40 rounded-2xl animate-pulse mb-4"
+              style={{ background: theme.isNight ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.07)" }} />
           )}
-          <p className="text-[15px] lg:text-[17px] text-secondary leading-relaxed mb-8 max-w-lg"
-            style={{ lineHeight: "1.75" }}>
-            {message}
+          <p className="text-[15px] lg:text-[17px] leading-relaxed mb-8 max-w-lg"
+            style={{ lineHeight: "1.75", color: theme.subTextColor }}>
+            {theme.message}
           </p>
 
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <Link
               href="/entries/new"
-              className="inline-flex items-center gap-2.5 rounded-2xl text-white font-semibold active:scale-[0.96] active:opacity-90 transition-transform duration-100"
+              className="inline-flex items-center gap-2.5 rounded-2xl font-semibold active:scale-[0.96] active:opacity-90 transition-transform duration-100"
               style={{
-                background: "linear-gradient(135deg, var(--accent), var(--accent-dark))",
-                boxShadow: "0 6px 28px var(--accent-glow)",
+                background: theme.ctaBackground,
+                boxShadow: `0 6px 24px ${theme.isNight ? "rgba(245,158,11,0.35)" : `${theme.accentColor}44`}`,
                 padding: "14px 28px",
                 fontSize: "15px",
+                color: "#ffffff",
                 touchAction: "manipulation",
                 userSelect: "none",
                 WebkitUserSelect: "none",
               }}
             >
               <Plus style={{ width: 17, height: 17 }} strokeWidth={2.5} />
-              {btnText}
+              {theme.btnText}
             </Link>
 
             <div className="flex flex-col gap-0.5">
-              <p className="text-[13px] text-secondary">
+              <p className="text-[13px]" style={{ color: theme.subTextColor }}>
                 {todayCount === 0 ? "今日はまだ記録がありません" : `今日、${todayCount}件の記憶を残しました`}
               </p>
-              <p className="text-[11px] text-muted">今月、合計 {monthCount}件の記録があります</p>
+              <p className="text-[11px]" style={{ color: theme.isNight ? "rgba(203,213,225,0.7)" : "rgba(100,116,139,0.8)" }}>
+                今月、合計 {monthCount}件の記録があります
+              </p>
             </div>
           </div>
         </div>
@@ -257,6 +304,15 @@ function HomeCards({ entries, reflection }: { entries: Entry[]; reflection: Refl
 export function HomeContent() {
   const [data, setData] = useState<HomeData | null>(null);
   const [loading, setLoading] = useState(true);
+  // null = SSR / before hydration → avoids hydration mismatch
+  const [theme, setTheme] = useState<TimeTheme | null>(null);
+
+  useEffect(() => {
+    setTheme(getTimeTheme(new Date().getHours()));
+  }, []);
+
+  // resolved theme (falls back to noon during SSR)
+  const t = theme ?? TIME_THEMES.noon;
 
   useEffect(() => {
     let mounted = true;
@@ -309,11 +365,12 @@ export function HomeContent() {
 
   return (
     <main className="min-h-dvh">
-      <HomeHeader />
+      <HomeHeader theme={t} />
       <TodayHero
         displayName={data?.displayName ?? ""}
         todayCount={data?.todayCount ?? 0}
         monthCount={data?.monthCount ?? 0}
+        theme={t}
       />
       {loading ? (
         <HomeSkeleton />
