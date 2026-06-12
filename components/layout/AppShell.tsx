@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { TimeBackground } from "./TimeBackground";
 import { SideNav, BottomNav } from "./SideNav";
 
@@ -25,7 +26,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             style={{ maxWidth: 800, margin: "0 auto", padding: "24px 16px 0" }}
             className="sm:px-6 lg:px-10 lg:pt-10"
           >
-            {children}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.04 }}>
+              {children}
+            </motion.div>
           </div>
         </main>
       </div>
