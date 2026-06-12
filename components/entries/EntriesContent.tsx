@@ -103,8 +103,8 @@ function SearchAndCategoryArea({ search, onSearch, selectedCategory, onSelectCat
       <div className="flex items-center gap-3">
         <div className="relative flex-1">
           <Search
-            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px]"
-            style={{ color: "var(--text-muted)" }}
+            className="pointer-events-none absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]"
+            style={{ color: "var(--text-muted)", left: 14 }}
             strokeWidth={1.8}
             aria-hidden="true"
           />
@@ -113,8 +113,8 @@ function SearchAndCategoryArea({ search, onSearch, selectedCategory, onSelectCat
             placeholder="タイトル・本文で検索"
             value={search}
             onChange={(e) => onSearch(e.target.value)}
-            className="h-12 w-full rounded-full bg-white border pl-10 pr-10 text-base font-medium text-primary placeholder:text-muted outline-none"
-            style={{ borderColor: "var(--glass-border)", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}
+            className="h-12 w-full rounded-full bg-white border pr-10 text-base font-medium text-primary placeholder:text-muted outline-none"
+            style={{ borderColor: "var(--glass-border)", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", paddingLeft: 44 }}
           />
           {search && (
             <button
