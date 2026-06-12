@@ -1,37 +1,5 @@
-export const dynamic = "force-dynamic";
-import { createClient } from "@/lib/supabase/server";
 import { ProfileContent } from "@/components/entries/ProfileContent";
 
-export default async function ProfilePage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  const [
-    { data: profile },
-    { count: totalEntries },
-    { count: photoCount },
-    { data: categoryStats },
-  ] = await Promise.all([
-    supabase.from("profiles").select("*").eq("id", user!.id).single(),
-    supabase.from("entries").select("*", { count: "exact", head: true }).eq("user_id", user!.id),
-    supabase.from("entries").select("*", { count: "exact", head: true }).eq("user_id", user!.id).not("image_url", "is", null),
-    supabase.from("entries").select("category").eq("user_id", user!.id),
-  ]);
-
-  const catMap: Record<string, number> = {};
-  for (const row of categoryStats ?? []) {
-    catMap[row.category] = (catMap[row.category] ?? 0) + 1;
-  }
-
-  return (
-    <ProfileContent
-      email={user!.email ?? ""}
-      displayName={profile?.display_name ?? user!.email?.split("@")[0] ?? ""}
-      avatarUrl={profile?.avatar_url ?? null}
-      totalEntries={totalEntries ?? 0}
-      photoCount={photoCount ?? 0}
-      categoryStats={catMap}
-      memberSince={profile?.created_at ?? user!.created_at}
-    />
-  );
+export default function ProfilePage() {
+  return <ProfileContent />;
 }
