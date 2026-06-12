@@ -17,39 +17,35 @@ const NAV = [
   { href: "/profile",  label: "自分",  icon: User },
 ];
 
-interface UserStats {
-  displayName: string;
-  email: string;
-  todayCount: number;
-  totalCount: number;
-}
-
-export function SideNav() {
-  const pathname = usePathname();
+/* ─────────────────────────────────────────────
+   SideNavStats
+   デスクトップでのみマウントされる。
+   Supabase 通信（getUser / profiles / entries count）は
+   このコンポーネントが実際にマウントされたときだけ実行される。
+   モバイルでは親がこのコンポーネントを描画しないため、
+   一切の通信が発生しない。
+───────────────────────────────────────────── */
+function SideNavStats() {
   const router = useRouter();
-  const [stats, setStats] = useState<UserStats | null>(null);
+  const [stats, setStats] = useState<{
+    displayName: string;
+    totalCount: number;
+  } | null>(null);
 
   useEffect(() => {
-    // デスクトップのみ実行（モバイルでは非表示なので通信不要）
-    if (window.innerWidth < 1024) return;
     const supabase = createClient();
-    async function load() {
+    (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      const today = new Date().toISOString().split("T")[0];
-      const [{ data: profile }, { count: total }, { count: todayC }] = await Promise.all([
+      const [{ data: profile }, { count: total }] = await Promise.all([
         supabase.from("profiles").select("display_name").eq("id", user.id).single(),
         supabase.from("entries").select("*", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase.from("entries").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("entry_date", today),
       ]);
       setStats({
         displayName: profile?.display_name ?? user.email?.split("@")[0] ?? "ゲスト",
-        email: user.email ?? "",
-        todayCount: todayC ?? 0,
         totalCount: total ?? 0,
       });
-    }
-    load();
+    })();
   }, []);
 
   async function handleSignOut() {
@@ -58,10 +54,53 @@ export function SideNav() {
     router.push("/auth");
   }
 
-  return (
-    <aside className="glass-sidebar hidden lg:flex flex-col flex-shrink-0 h-screen sticky top-0 z-40 overflow-y-auto"
-      style={{ width: 220 }}>
+  if (!stats) return null;
 
+  return (
+    <div className="mx-4 mb-6">
+      <div className="glass p-3 rounded-xl" style={{ borderRadius: 16 }}>
+        <div className="flex items-center gap-2.5 mb-2.5">
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0"
+            style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-dark))" }}>
+            {stats.displayName.charAt(0).toUpperCase()}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[12px] font-semibold text-primary truncate">{stats.displayName}</p>
+            <p className="text-[9px] text-muted truncate">{stats.totalCount}件の記録</p>
+          </div>
+        </div>
+        <motion.button
+          whileTap={{ scale: 0.97 }}
+          onClick={handleSignOut}
+          className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[11px] font-medium cursor-pointer"
+          style={{ background: "rgba(239,68,68,0.08)", color: "#f87171", border: "1px solid rgba(239,68,68,0.14)" }}
+        >
+          <LogOut style={{ width: 11, height: 11 }} /> ログアウト
+        </motion.button>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   SideNav（デスクトップ専用サイドバー）
+   レイアウト上は常に存在するが、SideNavStats は
+   isDesktop が確定した後にのみマウントされる。
+───────────────────────────────────────────── */
+export function SideNav() {
+  const pathname = usePathname();
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    // matchMedia で確実にデスクトップ判定。モバイルでは false のまま。
+    setIsDesktop(window.matchMedia("(min-width: 1024px)").matches);
+  }, []);
+
+  return (
+    <aside
+      className="glass-sidebar hidden lg:flex flex-col flex-shrink-0 h-screen sticky top-0 z-40 overflow-y-auto"
+      style={{ width: 220 }}
+    >
       {/* Logo */}
       <div className="px-5 pt-7 pb-5">
         <div className="flex items-center gap-2.5">
@@ -120,36 +159,16 @@ export function SideNav() {
 
       <div className="mx-5 mb-4 h-px" style={{ background: "var(--glass-border)" }} />
 
-      {/* User profile */}
-      <div className="mx-4 mb-6">
-        {stats && (
-          <div className="glass p-3 rounded-xl" style={{ borderRadius: 16 }}>
-            <div className="flex items-center gap-2.5 mb-2.5">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0"
-                style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-dark))" }}>
-                {stats.displayName.charAt(0).toUpperCase()}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[12px] font-semibold text-primary truncate">{stats.displayName}</p>
-                <p className="text-[9px] text-muted truncate">{stats.totalCount}件の記録</p>
-              </div>
-            </div>
-            <motion.button
-              whileTap={{ scale: 0.97 }}
-              onClick={handleSignOut}
-              className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[11px] font-medium cursor-pointer"
-              style={{ background: "rgba(239,68,68,0.08)", color: "#f87171", border: "1px solid rgba(239,68,68,0.14)" }}
-            >
-              <LogOut style={{ width: 11, height: 11 }} /> ログアウト
-            </motion.button>
-          </div>
-        )}
-      </div>
+      {/* Stats — デスクトップ確定後にのみマウント → モバイルで通信ゼロ */}
+      {isDesktop && <SideNavStats />}
     </aside>
   );
 }
 
-/* ── Mobile bottom nav ── */
+/* ─────────────────────────────────────────────
+   BottomNav（モバイル専用下部ナビ）
+   pendingHref でタップ即時カラー変更。
+───────────────────────────────────────────── */
 export function BottomNav() {
   const pathname = usePathname();
   const [pendingHref, setPendingHref] = useState<string | null>(null);
