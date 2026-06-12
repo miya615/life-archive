@@ -130,7 +130,8 @@ export function HomeContent() {
 
   if (!data) return null
 
-  const { entries, monthCount, todayCount, displayName, reflection } = data;
+  const { entries, monthCount, todayCount, displayName, reflection } = data
+  if (!entries) return null;
   const period = getPeriod();
   const { greeting, message, heroGlow, btnText } = TIME_CONFIG[period];
 
