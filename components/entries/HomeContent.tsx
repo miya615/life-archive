@@ -272,23 +272,14 @@ function HomeCards({ entries, reflection }: { entries: Entry[]; reflection: Refl
                       </div>
                     )}
 
-                    <div className="px-4 py-3 flex-1 flex flex-col">
-                      <div className="flex items-center gap-1.5 mb-1.5">
+                    <div className="px-4 py-3 flex flex-col justify-between flex-1">
+                      <div className="flex items-center gap-1.5 mb-2">
                         <span className="text-[12px] font-bold leading-none" style={{ color: cs.labelColor }}>
                           {entry.category}
                         </span>
                         <span className="text-[11px] text-muted ml-auto whitespace-nowrap">{formatDate(entry.entry_date)}</span>
                       </div>
-                      <p className="text-[13px] font-bold text-primary leading-snug line-clamp-1 mb-1">{entry.title}</p>
-                      {entry.content && (
-                        <p className="text-[11px] text-muted line-clamp-2 leading-relaxed flex-1 break-words">{entry.content}</p>
-                      )}
-                      <div className="flex items-center justify-end mt-2 pt-2"
-                        style={{ borderTop: `1px solid ${cs.borderColor}` }}>
-                        <span className="text-[11px] font-semibold flex items-center gap-0.5" style={{ color: cs.accent }}>
-                          続きを読む <ArrowRight style={{ width: 9, height: 9 }} strokeWidth={2.5} />
-                        </span>
-                      </div>
+                      <p className="text-[13px] font-bold text-primary leading-snug line-clamp-2">{entry.title}</p>
                     </div>
                   </Link>
                 </motion.div>
