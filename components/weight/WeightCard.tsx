@@ -64,10 +64,7 @@ export function WeightCard() {
                 </p>
               </>
             ) : (
-              <>
-                <p className="text-[18px] font-bold" style={{ color: "#94A3B8" }}>未記録</p>
-                <p className="text-[11px] mt-1" style={{ color: "#64748B" }}>今日の体重を記録しましょう</p>
-              </>
+              <p className="text-[18px] font-bold" style={{ color: "#94A3B8" }}>未記録</p>
             )}
           </div>
         </div>

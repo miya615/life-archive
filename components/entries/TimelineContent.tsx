@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Plus, ArrowRight } from "lucide-react";
+import { Plus } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { type Entry, CATEGORY_ICONS, CARD_STYLES } from "@/lib/types";
 
@@ -157,14 +157,6 @@ export function TimelineContent() {
                                     <span className="text-[11px] text-muted">{Number(entry.entry_date.split("-")[2])}日</span>
                                   </div>
                                   <p className="text-sm font-bold text-primary leading-snug">{entry.title}</p>
-                                  {entry.content && (
-                                    <p className="text-xs text-muted mt-0.5 line-clamp-2 leading-relaxed">{entry.content}</p>
-                                  )}
-                                  <div className="flex items-center gap-1 mt-2">
-                                    <span className="text-[11px] font-semibold flex items-center gap-0.5" style={{ color: cs.accent }}>
-                                      詳細 <ArrowRight className="w-2.5 h-2.5" />
-                                    </span>
-                                  </div>
                                 </div>
                               </div>
                             </div>

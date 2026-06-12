@@ -281,7 +281,7 @@ function HomeCards({ entries, reflection }: { entries: Entry[]; reflection: Refl
                     {/* ── テキストエリア（共通）── */}
                     <div className="flex min-h-0 flex-1 flex-col justify-start gap-1 px-3.5 pt-2.5 pb-3 overflow-hidden">
                       <div className="flex min-w-0 items-center gap-1">
-                        <span className="shrink-0 text-[11px] font-bold leading-tight" style={{ color: cs.labelColor }}>
+                        <span className="shrink-0 text-[13px] font-bold leading-tight" style={{ color: cs.labelColor }}>
                           {entry.category}
                         </span>
                         <span className="min-w-0 truncate text-[10px] leading-tight text-slate-400 ml-auto">{formatDate(entry.entry_date)}</span>
