@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
-import { WeightInputForm } from "./WeightInputForm";
+import { WeightInputForm, RecordButton } from "./WeightInputForm";
 import { WeightChart } from "./WeightChart";
 
 type Tab = "record" | "chart";
+
+const FORM_ID = "weight-record-form";
 
 interface WeightModalProps {
   open: boolean;
@@ -16,6 +18,9 @@ interface WeightModalProps {
 
 export function WeightModal({ open, onClose, onSaved }: WeightModalProps) {
   const [tab, setTab] = useState<Tab>("record");
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
 
   function handleSaved() {
     onSaved();
@@ -50,7 +55,6 @@ export function WeightModal({ open, onClose, onSaved }: WeightModalProps) {
               background: "#F8FAFC",
               borderRadius: "28px 28px 0 0",
               maxHeight: "92dvh",
-              paddingBottom: "max(env(safe-area-inset-bottom, 0px), 16px)",
               boxShadow: "0 -8px 40px rgba(0,0,0,0.14)",
             }}
           >
@@ -60,7 +64,7 @@ export function WeightModal({ open, onClose, onSaved }: WeightModalProps) {
             </div>
 
             {/* header */}
-            <div className="flex items-center justify-between px-5 pb-3 flex-shrink-0">
+            <div className="flex items-center justify-between flex-shrink-0" style={{ padding: "0 20px 12px" }}>
               <h2 className="text-[17px] font-bold" style={{ color: "#0F172A" }}>体重</h2>
               <button
                 type="button"
@@ -73,11 +77,8 @@ export function WeightModal({ open, onClose, onSaved }: WeightModalProps) {
             </div>
 
             {/* segmented control */}
-            <div className="px-5 pb-4 flex-shrink-0">
-              <div
-                className="flex p-1 rounded-2xl"
-                style={{ background: "#E2E8F0" }}
-              >
+            <div className="flex-shrink-0" style={{ padding: "0 20px 16px" }}>
+              <div className="flex p-1 rounded-2xl" style={{ background: "#E2E8F0" }}>
                 {(["record", "chart"] as Tab[]).map((t) => (
                   <button
                     key={t}
@@ -97,14 +98,41 @@ export function WeightModal({ open, onClose, onSaved }: WeightModalProps) {
               </div>
             </div>
 
-            {/* scrollable content */}
-            <div className="flex-1 overflow-y-auto px-5 pb-4" style={{ overscrollBehavior: "contain" }}>
+            {/* scrollable content — fields only, no button */}
+            <div
+              className="flex-1 overflow-y-auto"
+              style={{ padding: "0 20px 8px", overscrollBehavior: "contain" }}
+            >
               {tab === "record" ? (
-                <WeightInputForm onSaved={handleSaved} />
+                <WeightInputForm
+                  formId={FORM_ID}
+                  onSaved={handleSaved}
+                  saving={saving}
+                  setSaving={setSaving}
+                  saved={saved}
+                  setSaved={setSaved}
+                  error={error}
+                  setError={setError}
+                />
               ) : (
                 <WeightChart onRequestRecord={() => setTab("record")} />
               )}
             </div>
+
+            {/* sticky bottom: record button (record tab only) */}
+            {tab === "record" && (
+              <div
+                className="flex-shrink-0"
+                style={{
+                  padding: "12px 20px",
+                  paddingBottom: "max(env(safe-area-inset-bottom, 0px), 20px)",
+                  background: "#F8FAFC",
+                  borderTop: "1px solid #F1F5F9",
+                }}
+              >
+                <RecordButton formId={FORM_ID} saving={saving} saved={saved} />
+              </div>
+            )}
           </motion.div>
         </>
       )}
