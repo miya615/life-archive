@@ -1,38 +1,75 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
-import { Search, Plus, X, ArrowRight, Check, SlidersHorizontal } from "lucide-react";
-import { Entry, Category, CATEGORIES, CATEGORY_ICONS } from "@/lib/types";
-import { formatDate, CAT_GRADIENTS } from "@/lib/utils";
-
-const CARD = {
-  hidden:  { opacity: 0, y: 10, scale: 0.97 },
-  visible: (i: number) => ({ opacity: 1, y: 0, scale: 1, transition: { delay: Math.min(i * 0.02, 0.10), duration: 0.16, ease: "easeOut" as const } }),
-};
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowRight, Check, Plus, Search, SlidersHorizontal, X } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { CATEGORIES, CATEGORY_ICONS, type Category, type Entry } from "@/lib/types";
+import { CAT_GRADIENTS, formatDate } from "@/lib/utils";
 
 const ALL_CATS = ["すべて", ...CATEGORIES] as const;
 
-export function EntriesContent({ entries }: { entries: Entry[] }) {
+const CARD = {
+  hidden:  { opacity: 0, y: 8, scale: 0.98 },
+  visible: (i: number) => ({
+    opacity: 1, y: 0, scale: 1,
+    transition: { delay: Math.min(i * 0.02, 0.08), duration: 0.14, ease: "easeOut" as const },
+  }),
+};
+
+/** カードグリッドのスケルトン（データ取得中に即時表示） */
+function CardSkeleton() {
+  return (
+    <div className="grid grid-cols-2 xl:grid-cols-3 gap-3">
+      {[0, 1, 2, 3, 4, 5].map((i) => (
+        <div key={i} className="rounded-[20px] bg-slate-100 animate-pulse" style={{ height: 160 }} />
+      ))}
+    </div>
+  );
+}
+
+export function EntriesContent() {
+  const [entries, setEntries] = useState<Entry[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<Category | "すべて">("すべて");
   const [catOpen, setCatOpen] = useState(false);
 
+  // ページ表示後にクライアントでデータ取得
+  useEffect(() => {
+    const supabase = createClient();
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from("entries")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("entry_date", { ascending: false });
+      setEntries(data ?? []);
+      setLoading(false);
+    })();
+  }, []);
+
   const filtered = useMemo(() => entries.filter((e) => {
     const matchCat = selectedCategory === "すべて" || e.category === selectedCategory;
-    const matchSearch = !search || e.title.toLowerCase().includes(search.toLowerCase()) || (e.content?.toLowerCase() ?? "").includes(search.toLowerCase());
+    const matchSearch = !search
+      || e.title.toLowerCase().includes(search.toLowerCase())
+      || (e.content?.toLowerCase() ?? "").includes(search.toLowerCase());
     return matchCat && matchSearch;
   }), [entries, search, selectedCategory]);
 
   return (
     <div className="space-y-5 lg:space-y-7">
 
-      {/* ── Header ── */}
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="flex items-end justify-between">
+      {/* ── Header（データ待ちなし・即時表示） ── */}
+      <div className="flex items-end justify-between">
         <div>
           <h1 className="text-2xl lg:text-3xl xl:text-4xl font-bold text-primary">記録一覧</h1>
-          <p className="text-sm text-muted mt-1">{filtered.length}件の記録</p>
+          <p className="text-sm text-muted mt-1">
+            {loading ? "読み込み中..." : `${filtered.length}件の記録`}
+          </p>
         </div>
         <Link
           href="/entries/new"
@@ -41,12 +78,12 @@ export function EntriesContent({ entries }: { entries: Entry[] }) {
           <Plus className="w-4 h-4" strokeWidth={2.5} />
           <span className="hidden sm:inline">新しい記録</span>
         </Link>
-      </motion.div>
+      </div>
 
-      {/* ── Search + filter button ── */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.04 }}>
+      {/* ── 検索 + フィルターボタン（即時表示） ── */}
+      <div>
         <div className="flex items-center gap-3">
-          {/* Search input: left-4 icon + pl-12 text ensures 12px gap */}
+          {/* アイコン left-4、テキスト pl-14 で重ならない */}
           <div className="relative flex-1">
             <Search
               className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5"
@@ -74,11 +111,11 @@ export function EntriesContent({ entries }: { entries: Entry[] }) {
             )}
           </div>
 
-          {/* ･･ filter button */}
+          {/* フィルターボタン */}
           <button
             type="button"
             onClick={() => setCatOpen((v) => !v)}
-            aria-label="カテゴリを開く"
+            aria-label="カテゴリフィルター"
             className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-transform duration-100 active:scale-95"
             style={{
               touchAction: "manipulation",
@@ -96,7 +133,7 @@ export function EntriesContent({ entries }: { entries: Entry[] }) {
           </button>
         </div>
 
-        {/* Category accordion */}
+        {/* カテゴリアコーディオン */}
         <AnimatePresence initial={false}>
           {catOpen && (
             <motion.div
@@ -118,10 +155,7 @@ export function EntriesContent({ entries }: { entries: Entry[] }) {
                     <button
                       key={cat}
                       type="button"
-                      onClick={() => {
-                        setSelectedCategory(cat as Category | "すべて");
-                        setCatOpen(false);
-                      }}
+                      onClick={() => { setSelectedCategory(cat as Category | "すべて"); setCatOpen(false); }}
                       className="flex min-h-[52px] w-full items-center gap-3 px-4 text-left text-[15px] font-bold transition-colors duration-100 active:bg-slate-50"
                       style={{
                         borderBottom: isLast ? "none" : "1px solid var(--glass-border)",
@@ -143,7 +177,7 @@ export function EntriesContent({ entries }: { entries: Entry[] }) {
           )}
         </AnimatePresence>
 
-        {/* Active category badge (accordion closed) */}
+        {/* アクティブカテゴリバッジ */}
         {!catOpen && selectedCategory !== "すべて" && (
           <div className="mt-2 flex items-center gap-1.5">
             <span className="text-[12px] text-muted">フィルター中:</span>
@@ -163,62 +197,63 @@ export function EntriesContent({ entries }: { entries: Entry[] }) {
             </span>
           </div>
         )}
-      </motion.div>
+      </div>
 
-      {/* ── Card grid ── */}
-      <AnimatePresence>
-        {filtered.length === 0 ? (
-          <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="glass p-16 text-center">
-            <p className="text-5xl mb-4">🔍</p>
-            <p className="text-base text-muted">記録が見つかりません</p>
-          </motion.div>
-        ) : (
-          <motion.div key="grid" className="grid grid-cols-2 xl:grid-cols-3 gap-3">
-            {filtered.map((entry, i) => (
-              <motion.div key={entry.id} custom={i} variants={CARD} initial="hidden" animate="visible">
-                <Link href={`/entries/${entry.id}`}>
-                  <div
-                    className="glass overflow-hidden cursor-pointer h-full flex flex-col active:scale-[0.98] transition-transform duration-100"
-                    style={{ boxShadow: "var(--card-shadow)", minHeight: 160, touchAction: "manipulation" }}>
-                    {entry.image_url ? (
-                      <div className="relative overflow-hidden" style={{ height: 100 }}>
-                        <img src={entry.image_url} alt="" className="w-full h-full object-cover" style={{ opacity: 0.92 }} />
-                        <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 35%, rgba(0,0,0,0.4))" }} />
-                        <span className="absolute bottom-2 left-2 text-[9px] px-1.5 py-0.5 rounded-full text-white font-medium"
-                          style={{ background: "rgba(0,0,0,0.40)" }}>
-                          {CATEGORY_ICONS[entry.category]}
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center"
-                        style={{ height: 68, background: CAT_GRADIENTS[entry.category] ?? CAT_GRADIENTS["日常"] }}>
-                        <span className="text-3xl" style={{ opacity: 0.6 }}>{CATEGORY_ICONS[entry.category]}</span>
-                      </div>
+      {/* ── カードグリッド or スケルトン ── */}
+      {loading ? (
+        <CardSkeleton />
+      ) : filtered.length === 0 ? (
+        <div className="glass p-16 text-center">
+          <p className="text-5xl mb-4">🔍</p>
+          <p className="text-base text-muted">記録が見つかりません</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 xl:grid-cols-3 gap-3">
+          {filtered.map((entry, i) => (
+            <motion.div key={entry.id} custom={i} variants={CARD} initial="hidden" animate="visible">
+              <Link href={`/entries/${entry.id}`}>
+                <div
+                  className="glass overflow-hidden cursor-pointer h-full flex flex-col active:scale-[0.98] transition-transform duration-100"
+                  style={{ boxShadow: "var(--card-shadow)", minHeight: 160, touchAction: "manipulation" }}>
+                  {entry.image_url ? (
+                    <div className="relative overflow-hidden" style={{ height: 100 }}>
+                      <img src={entry.image_url} alt="" className="w-full h-full object-cover" style={{ opacity: 0.92 }} />
+                      <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 35%, rgba(0,0,0,0.4))" }} />
+                      <span className="absolute bottom-2 left-2 text-[9px] px-1.5 py-0.5 rounded-full text-white font-medium"
+                        style={{ background: "rgba(0,0,0,0.40)" }}>
+                        {CATEGORY_ICONS[entry.category]}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center"
+                      style={{ height: 68, background: CAT_GRADIENTS[entry.category] ?? CAT_GRADIENTS["日常"] }}>
+                      <span className="text-3xl" style={{ opacity: 0.6 }}>{CATEGORY_ICONS[entry.category]}</span>
+                    </div>
+                  )}
+                  <div className="px-4 py-3 flex-1 flex flex-col">
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <span className="text-[13px] font-bold leading-none" style={{ color: "var(--accent)" }}>
+                        {entry.category}
+                      </span>
+                      <span className="text-[11px] text-muted ml-auto whitespace-nowrap">{formatDate(entry.entry_date)}</span>
+                    </div>
+                    <p className="text-[13px] font-bold text-primary mb-1 leading-snug line-clamp-1">{entry.title}</p>
+                    {entry.content && (
+                      <p className="text-[11px] text-muted line-clamp-2 leading-relaxed flex-1 break-words">{entry.content}</p>
                     )}
-                    <div className="px-4 py-3 flex-1 flex flex-col">
-                      <div className="flex items-center gap-1.5 mb-1.5">
-                        <span className="text-[13px] font-bold leading-none" style={{ color: "var(--accent)" }}>
-                          {entry.category}
-                        </span>
-                        <span className="text-[11px] text-muted ml-auto whitespace-nowrap">{formatDate(entry.entry_date)}</span>
-                      </div>
-                      <p className="text-[13px] font-bold text-primary mb-1 leading-snug line-clamp-1">{entry.title}</p>
-                      {entry.content && <p className="text-[11px] text-muted line-clamp-2 leading-relaxed flex-1 break-words">{entry.content}</p>}
-                      <div className="flex items-center justify-end mt-2 pt-2"
-                        style={{ borderTop: "1px solid var(--glass-border)" }}>
-                        <span className="text-[11px] font-semibold flex items-center gap-0.5" style={{ color: "var(--accent)" }}>
-                          詳細 <ArrowRight className="w-2.5 h-2.5" strokeWidth={2.5} />
-                        </span>
-                      </div>
+                    <div className="flex items-center justify-end mt-2 pt-2"
+                      style={{ borderTop: "1px solid var(--glass-border)" }}>
+                      <span className="text-[11px] font-semibold flex items-center gap-0.5" style={{ color: "var(--accent)" }}>
+                        詳細 <ArrowRight className="w-2.5 h-2.5" strokeWidth={2.5} />
+                      </span>
                     </div>
                   </div>
-                </Link>
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+                </div>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
