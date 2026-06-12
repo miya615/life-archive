@@ -10,6 +10,31 @@ import { Category, CATEGORIES, CATEGORY_ICONS } from "@/lib/types";
 const EMOTIONS = ["😊", "😢", "😤", "😌", "🤔", "🔥", "😴", "🥳"];
 const WEATHERS = ["☀️", "⛅", "🌧️", "❄️", "🌙", "🌈"];
 
+/** 画像を最大幅 1280px にリサイズし、JPEG quality 0.82 で圧縮した Blob を返す */
+async function compressImage(file: File, maxWidth = 1280, quality = 0.82): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const scale = img.width > maxWidth ? maxWidth / img.width : 1;
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      const ctx = canvas.getContext("2d");
+      if (!ctx) { reject(new Error("canvas error")); return; }
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(
+        (blob) => blob ? resolve(blob) : reject(new Error("toBlob failed")),
+        "image/jpeg",
+        quality,
+      );
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+
 // Primary categories shown by default
 const PRIMARY_CATEGORIES: Category[] = ["思い出", "健康", "仕事", "学習", "お金"];
 const SECONDARY_CATEGORIES: Category[] = CATEGORIES.filter(
@@ -57,9 +82,14 @@ export function NewEntryForm({ editEntry }: {
 
     let imageUrl = editEntry?.image_url ?? null;
     if (imageFile) {
-      const ext = imageFile.name.split(".").pop();
-      const path = `${user.id}/${Date.now()}.${ext}`;
-      const { error: uploadError } = await supabase.storage.from("entry-images").upload(path, imageFile, { upsert: true });
+      let uploadBlob: Blob;
+      try {
+        uploadBlob = await compressImage(imageFile);
+      } catch {
+        uploadBlob = imageFile; // 圧縮失敗時はオリジナルをそのまま使用
+      }
+      const path = `${user.id}/${Date.now()}.jpg`;
+      const { error: uploadError } = await supabase.storage.from("entry-images").upload(path, uploadBlob, { upsert: true, contentType: "image/jpeg" });
       if (uploadError) { setError("画像のアップロードに失敗しました"); setLoading(false); return; }
       imageUrl = supabase.storage.from("entry-images").getPublicUrl(path).data.publicUrl;
     }
