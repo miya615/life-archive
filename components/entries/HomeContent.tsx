@@ -217,16 +217,16 @@ export function HomeContent({ entries, monthCount, todayCount, displayName }: Pr
                     </div>
                   )}
 
-                  <div className="p-3 flex-1 flex flex-col">
+                  <div className="px-4 py-3 flex-1 flex flex-col">
                     <div className="flex items-center gap-1.5 mb-1.5">
                       <span className="text-[13px] font-bold leading-none" style={{ color: "var(--accent)" }}>
                         {entry.category}
                       </span>
                       <span className="text-[11px] text-muted ml-auto whitespace-nowrap">{formatDate(entry.entry_date)}</span>
                     </div>
-                    <p className="text-[13px] font-bold text-primary leading-snug line-clamp-2 mb-1">{entry.title}</p>
+                    <p className="text-[13px] font-bold text-primary leading-snug line-clamp-1 mb-1">{entry.title}</p>
                     {entry.content && (
-                      <p className="text-[11px] text-muted line-clamp-2 leading-relaxed flex-1">{entry.content}</p>
+                      <p className="text-[11px] text-muted line-clamp-2 leading-relaxed flex-1 break-words">{entry.content}</p>
                     )}
                     <div className="flex items-center justify-end mt-2 pt-2"
                       style={{ borderTop: "1px solid var(--glass-border)" }}>

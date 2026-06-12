@@ -150,26 +150,51 @@ export function SideNav() {
 /* ── Mobile bottom nav ── */
 export function BottomNav() {
   const pathname = usePathname();
+  const router = useRouter();
+  /*
+    pendingHref: set synchronously on tap → instant color change before navigation settles.
+    Cleared when pathname updates (navigation complete).
+    This eliminates the 1-frame lag where pathname hasn't updated yet.
+  */
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
+
+  useEffect(() => {
+    setPendingHref(null);
+  }, [pathname]);
+
+  function isActive(href: string) {
+    const target = pendingHref ?? pathname;
+    return href === "/" ? target === "/" : target.startsWith(href);
+  }
+
   return (
     <nav className="lg:hidden glass-nav fixed bottom-0 left-0 right-0 z-50 pb-safe">
-      <div className="flex items-center justify-around px-2 pt-2 pb-1.5 max-w-lg mx-auto">
+      <div className="grid grid-cols-4 max-w-lg mx-auto">
         {NAV.map((item) => {
-          const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+          const active = isActive(item.href);
           const Icon = item.icon;
           return (
-            <Link
+            <button
               key={item.href}
-              href={item.href}
-              className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl min-w-[56px] active:scale-[0.88] active:opacity-75 transition-transform duration-100"
-              style={{
-                background: active ? "var(--glass-strong-bg)" : "transparent",
-                color: active ? "var(--accent)" : "var(--text-muted)",
-                touchAction: "manipulation",
+              type="button"
+              onClick={() => {
+                setPendingHref(item.href);
+                router.push(item.href);
               }}
+              className="flex flex-col items-center justify-center gap-1 py-2.5 min-h-[56px] active:scale-[0.88] transition-transform duration-100"
+              style={{ touchAction: "manipulation" }}
             >
-              <Icon style={{ width: 20, height: 20 }} strokeWidth={active ? 2.2 : 1.6} />
-              <span className="text-[10px] font-medium">{item.label}</span>
-            </Link>
+              <Icon
+                style={{ width: 22, height: 22, color: active ? "var(--accent)" : "var(--text-muted)", transition: "color 80ms" }}
+                strokeWidth={active ? 2.2 : 1.6}
+              />
+              <span
+                className="text-[10px] font-semibold"
+                style={{ color: active ? "var(--accent)" : "var(--text-muted)", transition: "color 80ms" }}
+              >
+                {item.label}
+              </span>
+            </button>
           );
         })}
       </div>

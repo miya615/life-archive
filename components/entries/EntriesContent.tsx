@@ -120,15 +120,15 @@ export function EntriesContent({ entries }: { entries: Entry[] }) {
                         <span className="text-3xl opacity-60">{CATEGORY_ICONS[entry.category]}</span>
                       </div>
                     )}
-                    <div className="p-3 flex-1 flex flex-col">
+                    <div className="px-4 py-3 flex-1 flex flex-col">
                       <div className="flex items-center gap-1.5 mb-1.5">
                         <span className="text-[13px] font-bold leading-none" style={{ color: "var(--accent)" }}>
                           {entry.category}
                         </span>
                         <span className="text-[11px] text-muted ml-auto whitespace-nowrap">{formatDate(entry.entry_date)}</span>
                       </div>
-                      <p className="text-[13px] font-bold text-primary mb-1 leading-snug line-clamp-2">{entry.title}</p>
-                      {entry.content && <p className="text-[11px] text-muted line-clamp-2 leading-relaxed flex-1">{entry.content}</p>}
+                      <p className="text-[13px] font-bold text-primary mb-1 leading-snug line-clamp-1">{entry.title}</p>
+                      {entry.content && <p className="text-[11px] text-muted line-clamp-2 leading-relaxed flex-1 break-words">{entry.content}</p>}
                       <div className="flex items-center justify-end mt-2 pt-2"
                         style={{ borderTop: "1px solid var(--glass-border)" }}>
                         <span className="text-[11px] font-semibold text-accent flex items-center gap-0.5">
