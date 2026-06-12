@@ -174,6 +174,7 @@ export function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
+              prefetch
               onClick={() => setPendingHref(item.href)}
               className="flex flex-col items-center justify-center gap-1 py-2.5 min-h-[56px] active:scale-[0.88] transition-transform duration-100"
               style={{ touchAction: "manipulation" }}
