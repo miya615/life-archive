@@ -207,11 +207,11 @@ function HomeCards({ entries, reflection }: { entries: Entry[]; reflection: Refl
       <WeightCard />
 
       <div>
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <h2 className="text-[17px] font-bold text-primary">最近の記録</h2>
-            <p className="text-[11px] text-muted mt-0.5">あなたの思い出・気づき・出来事</p>
-          </div>
+        <div className="mb-4 text-center">
+          <h2 className="text-[17px] font-bold text-primary">最近の記録</h2>
+          <p className="text-[11px] text-muted mt-0.5">あなたの思い出・気づき・出来事</p>
+        </div>
+        <div className="flex justify-end mb-3">
           <Link
             href="/entries"
             className="text-[12px] flex items-center gap-1 font-medium active:opacity-60 transition-opacity duration-100"
@@ -253,53 +253,41 @@ function HomeCards({ entries, reflection }: { entries: Entry[]; reflection: Refl
                     border: `1px solid ${cs.borderColor}`,
                     boxShadow: "var(--card-shadow)",
                     touchAction: "manipulation",
-                    minHeight: hasImage ? 260 : undefined,
+                    height: 200,
                   }}
                 >
                   <Link
                     href={`/entries/${entry.id}`}
-                    className="flex flex-col flex-1"
+                    className="flex flex-col h-full"
                     style={{ touchAction: "manipulation" }}
                   >
+                    {/* ── 画像 or アイコンエリア（共通 h-[112px]）── */}
                     {hasImage ? (
-                      /* ── 写真ありカード ── */
-                      <>
-                        <div className="w-full shrink-0 overflow-hidden" style={{ height: 150 }}>
-                          <img
-                            src={entry.image_url!}
-                            alt=""
-                            className="h-full w-full object-cover object-center"
-                          />
-                        </div>
-                        <div className="relative z-10 flex shrink-0 flex-col gap-1.5 px-4 pt-3 pb-5">
-                          <div className="flex min-w-0 items-center gap-1.5">
-                            <span className="shrink-0 text-[11px] font-bold leading-tight" style={{ color: cs.labelColor }}>
-                              {entry.category}
-                            </span>
-                            <span className="min-w-0 truncate text-[10px] leading-tight text-slate-400 ml-auto">{formatDate(entry.entry_date)}</span>
-                          </div>
-                          <p className="block w-full min-w-0 overflow-hidden break-words text-[13px] font-bold leading-snug line-clamp-2" style={{ color: "#0F172A" }}>{entry.title}</p>
-                        </div>
-                      </>
+                      <div className="w-full shrink-0 overflow-hidden" style={{ height: 112 }}>
+                        <img
+                          src={entry.image_url!}
+                          alt=""
+                          className="h-full w-full object-cover object-center"
+                        />
+                      </div>
                     ) : (
-                      /* ── 写真なしカード ── */
-                      <>
-                        <div className="flex items-center justify-center shrink-0" style={{ height: 56, background: `${cs.accent}22` }}>
-                          <span className="text-2xl" style={{ opacity: 0.7 }}>
-                            {CATEGORY_ICONS[entry.category]}
-                          </span>
-                        </div>
-                        <div className="flex shrink-0 flex-col gap-2 px-4 pt-3 pb-5">
-                          <div className="flex items-center gap-1.5 min-w-0">
-                            <span className="text-[11px] font-bold leading-none flex-shrink-0" style={{ color: cs.labelColor }}>
-                              {entry.category}
-                            </span>
-                            <span className="text-[10px] text-muted ml-auto whitespace-nowrap flex-shrink-0">{formatDate(entry.entry_date)}</span>
-                          </div>
-                          <p className="block w-full min-w-0 overflow-hidden break-words text-[13px] font-bold leading-snug line-clamp-2 text-primary">{entry.title}</p>
-                        </div>
-                      </>
+                      <div className="flex w-full shrink-0 items-center justify-center" style={{ height: 112, background: `${cs.accent}22` }}>
+                        <span className="text-3xl" style={{ opacity: 0.7 }}>
+                          {CATEGORY_ICONS[entry.category]}
+                        </span>
+                      </div>
                     )}
+
+                    {/* ── テキストエリア（共通）── */}
+                    <div className="flex min-h-0 flex-1 flex-col justify-start gap-1 px-3.5 pt-2.5 pb-3 overflow-hidden">
+                      <div className="flex min-w-0 items-center gap-1">
+                        <span className="shrink-0 text-[11px] font-bold leading-tight" style={{ color: cs.labelColor }}>
+                          {entry.category}
+                        </span>
+                        <span className="min-w-0 truncate text-[10px] leading-tight text-slate-400 ml-auto">{formatDate(entry.entry_date)}</span>
+                      </div>
+                      <p className="block min-w-0 overflow-hidden break-words text-[13px] font-bold leading-snug line-clamp-2" style={{ color: "#0F172A" }}>{entry.title}</p>
+                    </div>
                   </Link>
                 </motion.div>
               );
