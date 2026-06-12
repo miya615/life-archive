@@ -54,7 +54,7 @@ export function ProfileContent({ email, displayName: init, avatarUrl, totalEntri
         {/* Left */}
         <div className="flex flex-col gap-5 lg:w-80 flex-shrink-0">
           {/* Profile card */}
-          <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}
+          <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.14 }}
             className="glass-strong p-6"
             style={{ boxShadow: "0 8px 40px var(--accent-glow)" }}
           >
@@ -106,7 +106,7 @@ export function ProfileContent({ email, displayName: init, avatarUrl, totalEntri
           </motion.div>
 
           {/* AI teaser */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.14 }}
             className="glass p-5" style={{ border: "1px solid rgba(var(--accent-rgb, 167, 139, 250), 0.35)" }}>
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0"
@@ -134,7 +134,7 @@ export function ProfileContent({ email, displayName: init, avatarUrl, totalEntri
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {stats.map((s, i) => (
               <motion.div key={s.label}
-                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.06 }}
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.14 }}
                 className="glass p-4 text-center"
               >
                 <s.icon className="w-4 h-4 text-accent mx-auto mb-2" strokeWidth={1.8} />
@@ -146,13 +146,13 @@ export function ProfileContent({ email, displayName: init, avatarUrl, totalEntri
 
           {/* Category chart */}
           {topCats.length > 0 && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.14 }}
               className="glass p-6 flex-1">
               <h3 className="text-sm font-semibold text-secondary mb-5">カテゴリ別記録</h3>
               <div className="space-y-4">
                 {topCats.map(([cat, count], i) => (
                   <motion.div key={cat} className="flex items-center gap-3"
-                    initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 + i * 0.07 }}>
+                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.12 }}>
                     <span className="text-base w-6 text-center flex-shrink-0">
                       {CATEGORY_ICONS[cat as keyof typeof CATEGORY_ICONS] ?? "📝"}
                     </span>
@@ -163,7 +163,7 @@ export function ProfileContent({ email, displayName: init, avatarUrl, totalEntri
                         style={{ background: "linear-gradient(90deg, var(--accent), var(--accent-dark))" }}
                         initial={{ width: 0 }}
                         animate={{ width: `${(count / totalEntries) * 100}%` }}
-                        transition={{ duration: 0.8, delay: 0.5 + i * 0.07 }}
+                        transition={{ duration: 0.3 }}
                       />
                     </div>
                     <span className="text-xs text-muted w-8 text-right flex-shrink-0">{count}</span>

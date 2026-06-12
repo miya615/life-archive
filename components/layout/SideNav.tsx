@@ -30,6 +30,8 @@ export function SideNav() {
   const [stats, setStats] = useState<UserStats | null>(null);
 
   useEffect(() => {
+    // デスクトップのみ実行（モバイルでは非表示なので通信不要）
+    if (window.innerWidth < 1024) return;
     const supabase = createClient();
     async function load() {
       const { data: { user } } = await supabase.auth.getUser();

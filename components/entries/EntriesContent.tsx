@@ -59,7 +59,7 @@ export function EntriesContent({ entries }: { entries: Entry[] }) {
               placeholder="タイトル・本文で検索"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-12 w-full rounded-full bg-white border pl-12 pr-10 text-base font-medium text-primary placeholder:text-muted outline-none"
+              className="h-12 w-full rounded-full bg-white border pl-14 pr-10 text-base font-medium text-primary placeholder:text-muted outline-none"
               style={{ borderColor: "var(--glass-border)", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}
             />
             {search && (
@@ -166,7 +166,7 @@ export function EntriesContent({ entries }: { entries: Entry[] }) {
       </motion.div>
 
       {/* ── Card grid ── */}
-      <AnimatePresence mode="wait">
+      <AnimatePresence>
         {filtered.length === 0 ? (
           <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="glass p-16 text-center">

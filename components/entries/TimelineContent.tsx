@@ -55,8 +55,8 @@ export function TimelineContent({ entries }: { entries: Entry[] }) {
         <div className="space-y-14">
           {grouped.map(({ year, months }, yi) => (
             <motion.div key={year}
-              initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: yi * 0.1, duration: 0.5 }}>
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.14 }}>
               {/* Year header */}
               <div className="flex items-center gap-5 mb-8">
                 <div
@@ -75,8 +75,8 @@ export function TimelineContent({ entries }: { entries: Entry[] }) {
               <div className="ml-10 lg:ml-14 space-y-8">
                 {months.map(({ month, entries: me }, mi) => (
                   <motion.div key={month}
-                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: yi * 0.1 + mi * 0.06 }}>
+                    initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                    transition={{ duration: 0.12 }}>
                     {/* Month label */}
                     <div className="flex items-center gap-3 mb-4">
                       <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: "var(--accent)" }} />
@@ -89,9 +89,7 @@ export function TimelineContent({ entries }: { entries: Entry[] }) {
 
                     <div className="ml-6 grid grid-cols-2 xl:grid-cols-3 gap-3">
                       {me.map((entry, ei) => (
-                        <motion.div key={entry.id}
-                          initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: yi*0.1 + mi*0.06 + ei*0.04 }}>
+                        <div key={entry.id}>
                           <Link href={`/entries/${entry.id}`}>
                             <div
                               className="glass overflow-hidden cursor-pointer flex h-full active:scale-[0.98] transition-transform duration-100"
@@ -126,7 +124,7 @@ export function TimelineContent({ entries }: { entries: Entry[] }) {
                               </div>
                             </div>
                           </Link>
-                        </motion.div>
+                        </div>
                       ))}
                     </div>
                   </motion.div>

@@ -165,7 +165,7 @@ export function HomeContent({ entries, monthCount, todayCount, displayName, refl
               <motion.div key={entry.id}
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.03, duration: 0.22, ease: "easeOut" }}
+                transition={{ duration: 0.14, ease: "easeOut" }}
               >
                 <Link
                   href={`/entries/${entry.id}`}

@@ -11,7 +11,7 @@ export function HomeReflections({ data }: { data: ReflectionData }) {
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: 0.2 }}
+      transition={{ duration: 0.14 }}
       className="space-y-4 mt-2"
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
