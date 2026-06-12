@@ -6,17 +6,15 @@ import { getWeightRecords, getLatestRecord, fmtDate, type WeightRecord } from "@
 import { WeightModal } from "./WeightModal";
 
 export function WeightCard() {
-  const [records, setRecords] = useState<WeightRecord[]>([]);
+  const [latest, setLatest] = useState<WeightRecord | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  async function load() {
-    const data = await getWeightRecords();
-    setRecords(data);
+  function reload() {
+    const records = getWeightRecords();
+    setLatest(getLatestRecord(records));
   }
 
-  useEffect(() => { load(); }, []);
-
-  const latest = getLatestRecord(records);
+  useEffect(() => { reload(); }, []);
 
   return (
     <>
@@ -32,7 +30,6 @@ export function WeightCard() {
         onClick={() => setModalOpen(true)}
       >
         <div className="p-5">
-          {/* header row */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div
@@ -47,17 +44,12 @@ export function WeightCard() {
               type="button"
               onClick={(e) => { e.stopPropagation(); setModalOpen(true); }}
               className="text-[11px] font-semibold px-3 py-1.5 rounded-full active:opacity-70 transition-opacity duration-100"
-              style={{
-                background: "#10B981",
-                color: "#fff",
-                touchAction: "manipulation",
-              }}
+              style={{ background: "#10B981", color: "#fff", touchAction: "manipulation" }}
             >
               体重を記録
             </button>
           </div>
 
-          {/* value */}
           <div className="mt-4">
             {latest ? (
               <>
@@ -84,7 +76,7 @@ export function WeightCard() {
       <WeightModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        onSaved={load}
+        onSaved={reload}
       />
     </>
   );

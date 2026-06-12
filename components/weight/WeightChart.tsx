@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Scale } from "lucide-react";
-import { getWeightRecords, sortByDateAsc, fmtDate, type WeightRecord } from "@/lib/weight";
+import { getWeightRecords, fmtDate, type WeightRecord } from "@/lib/weight";
 
 const W = 320;
 const H = 180;
@@ -31,13 +31,11 @@ function buildChart(records: WeightRecord[]) {
   const points = records.map((r, i) => ({ x: xPos(i), y: yPos(r.weight), record: r }));
   const polyline = points.map((p) => `${p.x},${p.y}`).join(" ");
 
-  // y-axis labels: 4 ticks
-  const yTicks = Array.from({ length: 4 }, (_, i) => {
-    const val = yMin + (i / 3) * (yMax - yMin);
-    return { y: PAD.top + INNER_H - (i / 3) * INNER_H, val };
-  });
+  const yTicks = Array.from({ length: 4 }, (_, i) => ({
+    y: PAD.top + INNER_H - (i / 3) * INNER_H,
+    val: yMin + (i / 3) * (yMax - yMin),
+  }));
 
-  // x-axis labels: show up to 5 evenly spaced
   const xStep = Math.max(1, Math.floor(records.length / 5));
   const xLabels = records
     .map((r, i) => ({ i, date: r.date }))
@@ -47,28 +45,27 @@ function buildChart(records: WeightRecord[]) {
   return { points, polyline, yTicks, xLabels, xPos };
 }
 
-export function WeightChart({ onRequestRecord }: { onRequestRecord: () => void }) {
+interface WeightChartProps {
+  onRequestRecord: () => void;
+  /** pass refreshKey to force re-read from localStorage */
+  refreshKey?: number;
+}
+
+export function WeightChart({ onRequestRecord, refreshKey }: WeightChartProps) {
   const [records, setRecords] = useState<WeightRecord[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [activeIdx, setActiveIdx] = useState<number | null>(null);
 
   useEffect(() => {
-    let mounted = true;
-    getWeightRecords().then((data) => {
-      if (mounted) { setRecords(sortByDateAsc(data)); setLoading(false); }
-    });
-    return () => { mounted = false; };
-  }, []);
-
-  if (loading) {
-    return <div className="h-48 rounded-2xl animate-pulse" style={{ background: "#E2E8F0" }} />;
-  }
+    // sorted ascending (already guaranteed by saveWeightRecord)
+    setRecords(getWeightRecords());
+  }, [refreshKey]);
 
   if (records.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="w-16 h-16 rounded-3xl flex items-center justify-center mb-4"
-          style={{ background: "linear-gradient(135deg, #ECFDF5, #E0F2FE)" }}>
+        <div
+          className="w-16 h-16 rounded-3xl flex items-center justify-center mb-4"
+          style={{ background: "linear-gradient(135deg, #ECFDF5, #E0F2FE)" }}
+        >
           <Scale style={{ width: 28, height: 28, color: "#10B981" }} strokeWidth={1.5} />
         </div>
         <p className="text-[15px] font-semibold mb-1" style={{ color: "#374151" }}>
@@ -109,52 +106,31 @@ export function WeightChart({ onRequestRecord }: { onRequestRecord: () => void }
           padding: "16px 4px 8px 4px",
         }}
       >
-        <p className="text-[12px] font-semibold px-4 mb-2" style={{ color: "#374151" }}>体重の推移</p>
+        <p className="text-[12px] font-semibold px-4 mb-2" style={{ color: "#374151" }}>
+          体重の推移
+        </p>
         <svg
           viewBox={`0 0 ${W} ${H}`}
           style={{ width: "100%", height: "auto", display: "block" }}
           aria-hidden="true"
         >
-          {/* grid lines */}
           {yTicks.map((t, i) => (
-            <line
-              key={i}
-              x1={PAD.left} y1={t.y}
-              x2={PAD.left + INNER_W} y2={t.y}
-              stroke="#E2E8F0" strokeWidth="1"
-            />
+            <line key={i} x1={PAD.left} y1={t.y} x2={PAD.left + INNER_W} y2={t.y}
+              stroke="#E2E8F0" strokeWidth="1" />
           ))}
-
-          {/* y labels */}
           {yTicks.map((t, i) => (
-            <text
-              key={i}
-              x={PAD.left - 6} y={t.y + 4}
-              textAnchor="end"
-              fontSize={9}
-              fill="#94A3B8"
-            >
+            <text key={i} x={PAD.left - 6} y={t.y + 4} textAnchor="end" fontSize={9} fill="#94A3B8">
               {t.val.toFixed(1)}
             </text>
           ))}
-
-          {/* x labels */}
           {xLabels.map(({ i, date }) => {
             const [, m, d] = date.split("-");
             return (
-              <text
-                key={i}
-                x={xPos(i)} y={H - 4}
-                textAnchor="middle"
-                fontSize={9}
-                fill="#94A3B8"
-              >
+              <text key={i} x={xPos(i)} y={H - 4} textAnchor="middle" fontSize={9} fill="#94A3B8">
                 {`${Number(m)}/${Number(d)}`}
               </text>
             );
           })}
-
-          {/* area fill */}
           <defs>
             <linearGradient id="wg" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#10B981" stopOpacity="0.18" />
@@ -167,47 +143,11 @@ export function WeightChart({ onRequestRecord }: { onRequestRecord: () => void }
               fill="url(#wg)"
             />
           )}
-
-          {/* line */}
-          <polyline
-            points={polyline}
-            fill="none"
-            stroke="#10B981"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-
-          {/* dots */}
+          <polyline points={polyline} fill="none" stroke="#10B981" strokeWidth="2"
+            strokeLinecap="round" strokeLinejoin="round" />
           {points.map((p, i) => (
-            <circle
-              key={i}
-              cx={p.x} cy={p.y} r={activeIdx === i ? 6 : 4}
-              fill={activeIdx === i ? "#059669" : "#10B981"}
-              stroke="#fff" strokeWidth="2"
-              style={{ cursor: "pointer" }}
-              onClick={() => setActiveIdx(activeIdx === i ? null : i)}
-            />
+            <circle key={i} cx={p.x} cy={p.y} r={4} fill="#10B981" stroke="#fff" strokeWidth="2" />
           ))}
-
-          {/* tooltip */}
-          {activeIdx !== null && (() => {
-            const p = points[activeIdx];
-            const r = p.record;
-            const bx = Math.min(Math.max(p.x - 32, PAD.left), PAD.left + INNER_W - 72);
-            const by = p.y > PAD.top + 30 ? p.y - 38 : p.y + 12;
-            return (
-              <g>
-                <rect x={bx} y={by} width={72} height={26} rx={6} fill="#0F172A" opacity={0.88} />
-                <text x={bx + 36} y={by + 11} textAnchor="middle" fontSize={9} fill="#fff">
-                  {fmtDate(r.date)}
-                </text>
-                <text x={bx + 36} y={by + 22} textAnchor="middle" fontSize={10} fill="#6EE7B7" fontWeight="bold">
-                  {r.weight.toFixed(1)} kg
-                </text>
-              </g>
-            );
-          })()}
         </svg>
       </div>
 

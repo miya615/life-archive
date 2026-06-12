@@ -1,35 +1,33 @@
-import { createClient } from "@/lib/supabase/client";
-
 export interface WeightRecord {
   id: string;
-  user_id: string;
   weight: number;
-  date: string; // YYYY-MM-DD
-  created_at: string;
+  date: string;       // YYYY-MM-DD
+  createdAt: string;  // ISO string
 }
 
-export async function getWeightRecords(): Promise<WeightRecord[]> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
-  const { data } = await supabase
-    .from("weight_records")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("date", { ascending: false });
-  return data ?? [];
+const LS_KEY = "weight_records";
+
+export function getWeightRecords(): WeightRecord[] {
+  if (typeof window === "undefined") return [];
+  try {
+    return JSON.parse(localStorage.getItem(LS_KEY) ?? "[]");
+  } catch {
+    return [];
+  }
 }
 
-export async function saveWeightRecord(weight: number, date: string): Promise<void> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("未ログイン");
-  const { error } = await supabase.from("weight_records").insert({ user_id: user.id, weight, date });
-  if (error) throw error;
-}
-
-export function sortByDateAsc(records: WeightRecord[]): WeightRecord[] {
-  return [...records].sort((a, b) => a.date.localeCompare(b.date));
+export function saveWeightRecord(weight: number, date: string): WeightRecord[] {
+  const record: WeightRecord = {
+    id: crypto.randomUUID(),
+    weight: Math.round(weight * 10) / 10,
+    date,
+    createdAt: new Date().toISOString(),
+  };
+  const next = [...getWeightRecords(), record].sort(
+    (a, b) => a.date.localeCompare(b.date),
+  );
+  localStorage.setItem(LS_KEY, JSON.stringify(next));
+  return next;
 }
 
 export function getLatestRecord(records: WeightRecord[]): WeightRecord | null {

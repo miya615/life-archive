@@ -5,34 +5,31 @@ import { Check, Loader2 } from "lucide-react";
 import { saveWeightRecord } from "@/lib/weight";
 
 interface WeightInputFormProps {
-  formId: string;
   onSaved: () => void;
-  saving: boolean;
-  setSaving: (v: boolean) => void;
-  saved: boolean;
-  setSaved: (v: boolean) => void;
-  error: string;
-  setError: (v: string) => void;
 }
 
-export function WeightInputForm({
-  formId, onSaved,
-  saving, setSaving, saved, setSaved, error, setError,
-}: WeightInputFormProps) {
+export function WeightInputForm({ onSaved }: WeightInputFormProps) {
   const today = new Date().toISOString().split("T")[0];
   const [weight, setWeight] = useState("");
   const [date, setDate] = useState(today);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const w = parseFloat(weight);
-    if (!weight || isNaN(w)) { setError("体重を入力してください"); return; }
-    if (w <= 0 || w >= 300) { setError("正しい体重を入力してください（1〜299 kg）"); return; }
-    if (!date) { setError("日付を入力してください"); return; }
     setError("");
+
+    const w = parseFloat(weight);
+    if (!weight.trim()) { setError("体重を入力してください"); return; }
+    if (isNaN(w)) { setError("正しい体重を入力してください"); return; }
+    if (w <= 0) { setError("体重は 0 kg より大きい値で入力してください"); return; }
+    if (w >= 300) { setError("体重は 300 kg 未満で入力してください"); return; }
+    if (!date) { setError("日付を入力してください"); return; }
+
     setSaving(true);
     try {
-      await saveWeightRecord(w, date);
+      saveWeightRecord(w, date);
       setSaved(true);
       setTimeout(() => { setSaved(false); onSaved(); }, 900);
     } catch {
@@ -43,7 +40,7 @@ export function WeightInputForm({
   }
 
   return (
-    <form id={formId} onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <p className="text-[13px]" style={{ color: "#64748B" }}>
         今日の体重を入力してください。
       </p>
@@ -58,7 +55,7 @@ export function WeightInputForm({
             type="number"
             inputMode="decimal"
             step="0.1"
-            min="1"
+            min="0.1"
             max="299"
             placeholder="52.4"
             value={weight}
@@ -94,39 +91,30 @@ export function WeightInputForm({
         />
       </div>
 
+      {/* error */}
       {error && (
         <p className="text-[12px] font-medium" style={{ color: "#EF4444" }}>{error}</p>
       )}
+
+      {/* CTA button */}
+      <button
+        type="submit"
+        disabled={saving || saved}
+        className="w-full flex items-center justify-center gap-2 font-bold text-[15px] text-white active:scale-[0.98] transition-transform duration-100 disabled:opacity-60"
+        style={{
+          height: 52,
+          borderRadius: 999,
+          background: "linear-gradient(135deg, #10B981 0%, #34D399 100%)",
+          boxShadow: "0 12px 30px rgba(16,185,129,0.25)",
+          touchAction: "manipulation",
+        }}
+      >
+        {saved ? (
+          <><Check style={{ width: 18, height: 18 }} strokeWidth={2.5} /> 記録しました</>
+        ) : saving ? (
+          <Loader2 style={{ width: 18, height: 18 }} className="animate-spin" />
+        ) : "決定"}
+      </button>
     </form>
-  );
-}
-
-interface RecordButtonProps {
-  formId: string;
-  saving: boolean;
-  saved: boolean;
-}
-
-export function RecordButton({ formId, saving, saved }: RecordButtonProps) {
-  return (
-    <button
-      type="submit"
-      form={formId}
-      disabled={saving || saved}
-      className="w-full flex items-center justify-center gap-2 font-bold text-[15px] text-white active:scale-[0.98] transition-transform duration-100 disabled:opacity-60"
-      style={{
-        height: 52,
-        borderRadius: 999,
-        background: "linear-gradient(135deg, #10B981 0%, #34D399 100%)",
-        boxShadow: "0 6px 20px rgba(16,185,129,0.28)",
-        touchAction: "manipulation",
-      }}
-    >
-      {saved ? (
-        <><Check style={{ width: 18, height: 18 }} strokeWidth={2.5} /> 記録しました</>
-      ) : saving ? (
-        <Loader2 style={{ width: 18, height: 18 }} className="animate-spin" />
-      ) : "記録する"}
-    </button>
   );
 }
