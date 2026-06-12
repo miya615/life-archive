@@ -113,7 +113,7 @@ function SearchAndCategoryArea({ search, onSearch, selectedCategory, onSelectCat
             placeholder="タイトル・本文で検索"
             value={search}
             onChange={(e) => onSearch(e.target.value)}
-            className="h-12 w-full rounded-full bg-white border pl-12 pr-10 text-base font-medium text-primary placeholder:text-muted outline-none"
+            className="h-12 w-full rounded-full bg-white border pl-14 pr-10 text-base font-medium text-primary placeholder:text-muted outline-none"
             style={{ borderColor: "var(--glass-border)", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}
           />
           {search && (
