@@ -145,30 +145,25 @@ export function HomeReflections() {
               <Sparkles style={{ width: 13, height: 13, color: "var(--accent)" }} strokeWidth={1.8} />
               <p className="text-[13px] font-semibold text-secondary">1年前の今日</p>
             </div>
-            <Link href="/timeline">
-              <motion.span whileHover={{ x: 2 }}
-                className="text-[11px] flex items-center gap-1 cursor-pointer"
-                style={{ color: "var(--accent)" }}>
-                もっと見る <ArrowRight style={{ width: 10, height: 10 }} />
-              </motion.span>
+            <Link href="/timeline"
+              className="text-[11px] flex items-center gap-1 active:opacity-60 transition-opacity duration-100"
+              style={{ color: "var(--accent)", touchAction: "manipulation" }}>
+              もっと見る <ArrowRight style={{ width: 10, height: 10 }} />
             </Link>
           </div>
           <div className="space-y-2.5">
             {data.oneYearAgo.map((entry) => (
-              <Link key={entry.id} href={`/entries/${entry.id}`}>
-                <motion.div
-                  whileTap={{ scale: 0.98 }}
-                  className="flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-colors"
-                  style={{ background: "var(--glass-bg)" }}
-                >
-                  <span className="text-lg flex-shrink-0 mt-0.5">{CATEGORY_ICONS[entry.category]}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-semibold text-primary truncate">{entry.title}</p>
-                    <p className="text-[10px] text-muted mt-0.5">
-                      {new Date(entry.entry_date).getFullYear()}年 · {entry.category}
-                    </p>
-                  </div>
-                </motion.div>
+              <Link key={entry.id} href={`/entries/${entry.id}`}
+                className="flex items-start gap-3 p-3 rounded-xl active:scale-[0.98] active:opacity-80 transition-transform duration-100 block"
+                style={{ background: "var(--glass-bg)", touchAction: "manipulation" }}
+              >
+                <span className="text-lg flex-shrink-0 mt-0.5">{CATEGORY_ICONS[entry.category]}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-semibold text-primary truncate">{entry.title}</p>
+                  <p className="text-[10px] text-muted mt-0.5">
+                    {new Date(entry.entry_date).getFullYear()}年 · {entry.category}
+                  </p>
+                </div>
               </Link>
             ))}
           </div>

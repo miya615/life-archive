@@ -34,23 +34,24 @@ export function EntryDetail({ entry }: { entry: Entry }) {
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="max-w-2xl">
       {/* Toolbar */}
       <div className="flex items-center justify-between mb-6">
-        <motion.button whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.93 }}
-          onClick={() => router.back()} className="w-9 h-9 glass rounded-2xl flex items-center justify-center">
+        <button
+          onClick={() => router.back()}
+          className="w-11 h-11 glass rounded-2xl flex items-center justify-center active:scale-[0.93] active:opacity-80 transition-transform duration-100"
+          style={{ touchAction: "manipulation" }}>
           <ArrowLeft className="w-4 h-4 text-secondary" strokeWidth={2} />
-        </motion.button>
+        </button>
         <div className="flex gap-2">
-          <Link href={`/entries/${entry.id}/edit`}>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-2 h-9 px-4 glass rounded-2xl text-sm font-medium text-secondary cursor-pointer">
-              <Edit2 className="w-3.5 h-3.5" /> 編集
-            </motion.div>
+          <Link href={`/entries/${entry.id}/edit`}
+            className="flex items-center gap-2 h-11 px-4 glass rounded-2xl text-sm font-medium text-secondary active:scale-[0.95] active:opacity-80 transition-transform duration-100"
+            style={{ touchAction: "manipulation" }}>
+            <Edit2 className="w-3.5 h-3.5" /> 編集
           </Link>
-          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+          <button
             onClick={() => setShowConfirm(true)}
-            className="flex items-center gap-2 h-9 px-4 rounded-2xl text-sm font-medium"
-            style={{ background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.2)" }}>
+            className="flex items-center gap-2 h-11 px-4 rounded-2xl text-sm font-medium active:scale-[0.95] active:opacity-80 transition-transform duration-100"
+            style={{ background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.2)", touchAction: "manipulation" }}>
             <Trash2 className="w-3.5 h-3.5" /> 削除
-          </motion.button>
+          </button>
         </div>
       </div>
 
@@ -102,7 +103,7 @@ export function EntryDetail({ entry }: { entry: Entry }) {
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
-            style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(12px)" }}
+            style={{ background: "rgba(0,0,0,0.75)" }}
           >
             <motion.div
               initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
@@ -120,15 +121,16 @@ export function EntryDetail({ entry }: { entry: Entry }) {
                 </div>
               </div>
               <div className="flex gap-3 mt-5">
-                <motion.button whileTap={{ scale: 0.95 }} onClick={() => setShowConfirm(false)}
-                  className="flex-1 py-3 glass rounded-2xl text-sm font-medium text-secondary flex items-center justify-center gap-1.5">
+                <button onClick={() => setShowConfirm(false)}
+                  className="flex-1 py-3 glass rounded-2xl text-sm font-medium text-secondary flex items-center justify-center gap-1.5 active:scale-[0.95] active:opacity-80 transition-transform duration-100"
+                  style={{ touchAction: "manipulation" }}>
                   <X className="w-4 h-4" /> キャンセル
-                </motion.button>
-                <motion.button whileTap={{ scale: 0.95 }} onClick={handleDelete} disabled={deleting}
-                  className="flex-1 py-3 rounded-2xl text-sm font-medium text-white flex items-center justify-center gap-1.5 disabled:opacity-60"
-                  style={{ background: "#ef4444", boxShadow: "0 4px 16px rgba(239,68,68,0.3)" }}>
+                </button>
+                <button onClick={handleDelete} disabled={deleting}
+                  className="flex-1 py-3 rounded-2xl text-sm font-medium text-white flex items-center justify-center gap-1.5 disabled:opacity-60 active:scale-[0.95] active:opacity-90 transition-transform duration-100"
+                  style={{ background: "#ef4444", boxShadow: "0 4px 16px rgba(239,68,68,0.3)", touchAction: "manipulation" }}>
                   <Trash2 className="w-4 h-4" /> {deleting ? "削除中..." : "削除する"}
-                </motion.button>
+                </button>
               </div>
             </motion.div>
           </motion.div>

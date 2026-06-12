@@ -85,21 +85,23 @@ export function ProfileContent({ email, displayName: init, avatarUrl, totalEntri
             {/* Edit buttons */}
             {editing ? (
               <div className="flex gap-2">
-                <motion.button whileTap={{ scale: 0.95 }} onClick={() => setEditing(false)}
-                  className="flex-1 py-2.5 glass rounded-2xl text-sm font-medium text-secondary flex items-center justify-center gap-1.5">
+                <button onClick={() => setEditing(false)}
+                  className="flex-1 py-2.5 glass rounded-2xl text-sm font-medium text-secondary flex items-center justify-center gap-1.5 active:scale-[0.95] active:opacity-80 transition-transform duration-100"
+                  style={{ touchAction: "manipulation" }}>
                   <X className="w-3.5 h-3.5" /> キャンセル
-                </motion.button>
-                <motion.button whileTap={{ scale: 0.95 }} onClick={handleSave} disabled={saving}
-                  className="flex-1 py-2.5 rounded-2xl text-sm font-medium text-white flex items-center justify-center gap-1.5 disabled:opacity-60"
-                  style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-dark))" }}>
+                </button>
+                <button onClick={handleSave} disabled={saving}
+                  className="flex-1 py-2.5 rounded-2xl text-sm font-medium text-white flex items-center justify-center gap-1.5 disabled:opacity-60 active:scale-[0.95] active:opacity-90 transition-transform duration-100"
+                  style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-dark))", touchAction: "manipulation" }}>
                   <Check className="w-3.5 h-3.5" /> {saving ? "保存中..." : "保存"}
-                </motion.button>
+                </button>
               </div>
             ) : (
-              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => setEditing(true)}
-                className="w-full py-2.5 glass rounded-2xl text-sm font-medium text-secondary flex items-center justify-center gap-2">
+              <button onClick={() => setEditing(true)}
+                className="w-full py-2.5 glass rounded-2xl text-sm font-medium text-secondary flex items-center justify-center gap-2 active:scale-[0.97] active:opacity-80 transition-transform duration-100"
+                style={{ touchAction: "manipulation" }}>
                 <Edit2 className="w-3.5 h-3.5" /> 名前を変更
-              </motion.button>
+              </button>
             )}
           </motion.div>
 
@@ -119,11 +121,11 @@ export function ProfileContent({ email, displayName: init, avatarUrl, totalEntri
           </motion.div>
 
           {/* Sign out */}
-          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={handleSignOut}
-            className="w-full py-3.5 glass rounded-2xl text-sm font-medium flex items-center justify-center gap-2"
-            style={{ color: "#f87171", border: "1px solid rgba(239,68,68,0.2)" }}>
+          <button onClick={handleSignOut}
+            className="w-full py-3.5 glass rounded-2xl text-sm font-medium flex items-center justify-center gap-2 active:scale-[0.97] active:opacity-80 transition-transform duration-100"
+            style={{ color: "#f87171", border: "1px solid rgba(239,68,68,0.2)", touchAction: "manipulation" }}>
             <LogOut className="w-4 h-4" /> ログアウト
-          </motion.button>
+          </button>
         </div>
 
         {/* Right */}
@@ -133,7 +135,6 @@ export function ProfileContent({ email, displayName: init, avatarUrl, totalEntri
             {stats.map((s, i) => (
               <motion.div key={s.label}
                 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.06 }}
-                whileHover={{ scale: 1.04, y: -2 }}
                 className="glass p-4 text-center"
               >
                 <s.icon className="w-4 h-4 text-accent mx-auto mb-2" strokeWidth={1.8} />
