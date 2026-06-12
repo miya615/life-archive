@@ -33,7 +33,7 @@ export function WeightModal({ open, onClose, onSaved }: WeightModalProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.18 }}
-            className="fixed inset-0 z-50"
+            className="fixed inset-0 z-[60]"
             style={{ background: "rgba(15,23,42,0.45)", backdropFilter: "blur(2px)" }}
             onClick={onClose}
           />
@@ -45,7 +45,7 @@ export function WeightModal({ open, onClose, onSaved }: WeightModalProps) {
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 32, stiffness: 320, mass: 0.9 }}
-            className="fixed bottom-0 left-0 right-0 z-50 flex flex-col"
+            className="fixed bottom-0 left-0 right-0 z-[61] flex flex-col"
             style={{
               background: "#F8FAFC",
               borderRadius: "28px 28px 0 0",
