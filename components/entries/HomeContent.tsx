@@ -9,6 +9,7 @@ import { Entry, CATEGORY_ICONS, CARD_STYLES } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
 import type { ReflectionData } from "@/lib/utils";
 import { HomeReflections } from "./HomeReflections";
+import { WeightCard } from "@/components/weight/WeightCard";
 
 function todayFormatted() {
   return new Date().toLocaleDateString("ja-JP", {
@@ -202,6 +203,9 @@ function HomeSkeleton() {
 function HomeCards({ entries, reflection }: { entries: Entry[]; reflection: ReflectionData }) {
   return (
     <div className="space-y-8 px-4">
+      {/* 体重カード */}
+      <WeightCard />
+
       <div>
         <div className="flex items-center justify-between mb-5">
           <div>
