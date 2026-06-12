@@ -81,12 +81,7 @@ function TodayHero({ displayName, todayCount, monthCount }: {
   const { message, heroGlow, btnText } = TIME_CONFIG[period];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, ease: "easeOut" }}
-      className="mx-4 mb-6"
-    >
+    <div className="mx-4 mb-6">
       <div
         className="glass-strong relative overflow-hidden"
         style={{
@@ -136,7 +131,7 @@ function TodayHero({ displayName, todayCount, monthCount }: {
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -335,18 +330,11 @@ export function HomeContent() {
     return () => { mounted = false; };
   }, []);
 
-  const entries = data?.entries ?? null;
+  const entries = data?.entries ?? null
 
   return (
     <main className="min-h-dvh">
       <HomeHeader />
-      {data && (
-        <TodayHero
-          displayName={data.displayName}
-          todayCount={data.todayCount}
-          monthCount={data.monthCount}
-        />
-      )}
 
       <AnimatePresence mode="wait">
         {loading ? (
@@ -355,7 +343,12 @@ export function HomeContent() {
           </motion.div>
         ) : (
           entries && data && (
-            <div>
+            <motion.div key="content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
+              <TodayHero
+                displayName={data.displayName}
+                todayCount={data.todayCount}
+                monthCount={data.monthCount}
+              />
               <HomeCards entries={entries} reflection={data.reflection} />
             </motion.div>
           )

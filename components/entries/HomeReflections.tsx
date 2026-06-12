@@ -1,19 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { Sparkles, ArrowRight, Quote, TrendingUp } from "lucide-react";
 import { CATEGORY_ICONS } from "@/lib/types";
 import type { ReflectionData } from "@/lib/utils";
 
 export function HomeReflections({ data }: { data: ReflectionData }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.14 }}
-      className="space-y-4 mt-2"
-    >
+    <div className="space-y-4 mt-2">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Daily quote */}
         <div className="glass p-5" style={{ borderLeft: "2px solid var(--accent)" }}>
@@ -86,6 +80,6 @@ export function HomeReflections({ data }: { data: ReflectionData }) {
           </div>
         </div>
       )}
-    </motion.div>
+    </div>
   );
 }
