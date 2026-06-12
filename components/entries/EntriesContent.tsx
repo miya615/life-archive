@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Check, Plus, Search, SlidersHorizontal, X } from "lucide-react";
+import { Check, Search, SlidersHorizontal, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { CATEGORIES, CATEGORY_ICONS, CARD_STYLES, type Category, type Entry } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
@@ -47,39 +47,25 @@ function RecordGrid({ entries }: { entries: Entry[] }) {
           <motion.div key={entry.id} custom={i} variants={CARD} initial="hidden" animate="visible">
             <Link href={`/entries/${entry.id}`}>
               <div
-                className="overflow-hidden cursor-pointer h-full flex flex-col active:scale-[0.98] transition-transform duration-100 rounded-[20px]"
-                style={{ background: cs.bg, border: `1px solid ${cs.borderColor}`, boxShadow: "var(--card-shadow)", minHeight: 160, touchAction: "manipulation" }}>
+                className="overflow-hidden cursor-pointer flex flex-col active:scale-[0.98] transition-transform duration-100 rounded-[20px]"
+                style={{ background: cs.bg, border: `1px solid ${cs.borderColor}`, boxShadow: "var(--card-shadow)", height: 160, touchAction: "manipulation" }}>
                 {entry.image_url ? (
-                  <div className="relative overflow-hidden" style={{ height: 100 }}>
-                    <img src={entry.image_url} alt="" className="w-full h-full object-cover" style={{ opacity: 0.92 }} />
-                    <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 35%, rgba(0,0,0,0.4))" }} />
-                    <span className="absolute bottom-2 left-2 text-[9px] px-1.5 py-0.5 rounded-full text-white font-medium"
-                      style={{ background: "rgba(0,0,0,0.40)" }}>
-                      {CATEGORY_ICONS[entry.category]}
-                    </span>
+                  <div className="w-full shrink-0 overflow-hidden" style={{ height: 88 }}>
+                    <img src={entry.image_url} alt="" className="h-full w-full object-cover object-center" />
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center" style={{ height: 64, background: `${cs.accent}22` }}>
+                  <div className="flex w-full shrink-0 items-center justify-center" style={{ height: 88, background: `${cs.accent}22` }}>
                     <span className="text-3xl" style={{ opacity: 0.7 }}>{CATEGORY_ICONS[entry.category]}</span>
                   </div>
                 )}
-                <div className="px-4 py-3 flex-1 flex flex-col">
-                  <div className="flex items-center gap-1.5 mb-1.5">
-                    <span className="text-[12px] font-bold leading-none" style={{ color: cs.labelColor }}>
+                <div className="flex min-h-0 flex-1 flex-col justify-start gap-1 px-3.5 pt-2 pb-2.5 overflow-hidden">
+                  <div className="flex min-w-0 items-center gap-1">
+                    <span className="shrink-0 text-[11px] font-bold leading-tight" style={{ color: cs.labelColor }}>
                       {entry.category}
                     </span>
-                    <span className="text-[11px] text-muted ml-auto whitespace-nowrap">{formatDate(entry.entry_date)}</span>
+                    <span className="min-w-0 truncate text-[10px] leading-tight text-slate-400 ml-auto">{formatDate(entry.entry_date)}</span>
                   </div>
-                  <p className="text-[13px] font-bold text-primary mb-1 leading-snug line-clamp-1">{entry.title}</p>
-                  {entry.content && (
-                    <p className="text-[11px] text-muted line-clamp-2 leading-relaxed flex-1 break-words">{entry.content}</p>
-                  )}
-                  <div className="flex items-center justify-end mt-2 pt-2"
-                    style={{ borderTop: `1px solid ${cs.borderColor}` }}>
-                    <span className="text-[11px] font-semibold flex items-center gap-0.5" style={{ color: cs.accent }}>
-                      詳細 <ArrowRight className="w-2.5 h-2.5" strokeWidth={2.5} />
-                    </span>
-                  </div>
+                  <p className="block min-w-0 overflow-hidden break-words text-[13px] font-bold leading-snug line-clamp-2" style={{ color: "#0F172A" }}>{entry.title}</p>
                 </div>
               </div>
             </Link>
@@ -99,14 +85,42 @@ interface SearchAndCategoryAreaProps {
 
 function SearchAndCategoryArea({ search, onSearch, selectedCategory, onSelectCategory }: SearchAndCategoryAreaProps) {
   const [catOpen, setCatOpen] = useState(false);
+  const isFiltered = selectedCategory !== "すべて";
 
   return (
     <div>
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1">
+      {/* 検索欄 + カテゴリフィルターを横並び */}
+      <div className="flex items-center gap-2">
+        {/* カテゴリフィルターボタン（左） */}
+        <button
+          type="button"
+          onClick={() => setCatOpen((v) => !v)}
+          aria-label="カテゴリフィルター"
+          className="flex h-11 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-semibold transition-all duration-100 active:scale-95"
+          style={{
+            touchAction: "manipulation",
+            background: catOpen || isFiltered
+              ? "linear-gradient(135deg, var(--accent), var(--accent-dark))"
+              : "white",
+            color: catOpen || isFiltered ? "white" : "var(--text-secondary)",
+            border: catOpen || isFiltered ? "none" : "1px solid var(--glass-border)",
+            boxShadow: catOpen || isFiltered
+              ? "0 4px 16px var(--accent-glow)"
+              : "0 1px 4px rgba(0,0,0,0.06)",
+            maxWidth: 140,
+          }}
+        >
+          <SlidersHorizontal className="w-4 h-4 shrink-0" strokeWidth={2} />
+          <span className="truncate">
+            {isFiltered ? selectedCategory : "すべて"}
+          </span>
+        </button>
+
+        {/* 検索欄（右、flex-1） */}
+        <div className="relative min-w-0 flex-1">
           <Search
-            className="pointer-events-none absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]"
-            style={{ color: "var(--text-muted)", left: 14 }}
+            className="pointer-events-none absolute top-1/2 -translate-y-1/2 w-4 h-4"
+            style={{ color: "var(--text-muted)", left: 12 }}
             strokeWidth={1.8}
             aria-hidden="true"
           />
@@ -115,42 +129,23 @@ function SearchAndCategoryArea({ search, onSearch, selectedCategory, onSelectCat
             placeholder="タイトル・本文で検索"
             value={search}
             onChange={(e) => onSearch(e.target.value)}
-            className="h-12 w-full rounded-full bg-white border pr-10 text-base font-medium text-primary placeholder:text-muted outline-none"
-            style={{ borderColor: "var(--glass-border)", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", paddingLeft: 44 }}
+            className="h-11 w-full rounded-full bg-white border pr-9 text-[13px] font-medium text-primary placeholder:text-muted outline-none"
+            style={{ borderColor: "var(--glass-border)", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", paddingLeft: 36 }}
           />
           {search && (
             <button
               type="button"
               onClick={() => onSearch("")}
-              className="absolute right-4 top-1/2 -translate-y-1/2"
+              className="absolute right-3 top-1/2 -translate-y-1/2"
               style={{ color: "var(--text-muted)", touchAction: "manipulation" }}
             >
               <X className="w-4 h-4" />
             </button>
           )}
         </div>
-
-        <button
-          type="button"
-          onClick={() => setCatOpen((v) => !v)}
-          aria-label="カテゴリフィルター"
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-transform duration-100 active:scale-95"
-          style={{
-            touchAction: "manipulation",
-            background: catOpen || selectedCategory !== "すべて"
-              ? "linear-gradient(135deg, var(--accent), var(--accent-dark))"
-              : "white",
-            color: catOpen || selectedCategory !== "すべて" ? "white" : "var(--text-secondary)",
-            border: catOpen || selectedCategory !== "すべて" ? "none" : "1px solid var(--glass-border)",
-            boxShadow: catOpen || selectedCategory !== "すべて"
-              ? "0 4px 16px var(--accent-glow)"
-              : "0 1px 4px rgba(0,0,0,0.06)",
-          }}
-        >
-          <SlidersHorizontal className="w-5 h-5" strokeWidth={2} />
-        </button>
       </div>
 
+      {/* カテゴリ選択パネル */}
       <AnimatePresence initial={false}>
         {catOpen && (
           <motion.div
@@ -194,7 +189,8 @@ function SearchAndCategoryArea({ search, onSearch, selectedCategory, onSelectCat
         )}
       </AnimatePresence>
 
-      {!catOpen && selectedCategory !== "すべて" && (
+      {/* フィルター中バッジ */}
+      {!catOpen && isFiltered && (
         <div className="mt-2 flex items-center gap-1.5">
           <span className="text-[12px] text-muted">フィルター中:</span>
           <span
@@ -255,20 +251,11 @@ export function EntriesContent() {
 
   return (
     <div className="space-y-5 lg:space-y-7">
-      <div className="flex items-end justify-between">
-        <div>
-          <h1 className="text-2xl lg:text-3xl xl:text-4xl font-bold text-primary">記録一覧</h1>
-          <p className="text-sm text-muted mt-1">
-            {loading ? "読み込み中..." : `${filtered.length}件の記録`}
-          </p>
-        </div>
-        <Link
-          href="/entries/new"
-          className="flex items-center gap-2 px-5 py-3 rounded-2xl text-white font-semibold text-sm active:scale-95 transition-transform duration-100"
-          style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-dark))", boxShadow: "0 4px 20px var(--accent-glow)", touchAction: "manipulation" }}>
-          <Plus className="w-4 h-4" strokeWidth={2.5} />
-          <span className="hidden sm:inline">新しい記録</span>
-        </Link>
+      <div>
+        <h1 className="text-2xl lg:text-3xl xl:text-4xl font-bold text-primary">記録一覧</h1>
+        <p className="text-sm text-muted mt-1">
+          {loading ? "読み込み中..." : `${filtered.length}件の記録`}
+        </p>
       </div>
 
       <SearchAndCategoryArea
