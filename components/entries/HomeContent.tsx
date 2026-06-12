@@ -355,7 +355,7 @@ export function HomeContent() {
           </motion.div>
         ) : (
           entries && data && (
-            <motion.div key="cards" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, delay: 0.2 }}>
+            <motion.div key="cards" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.2 }}>
               <HomeCards entries={entries} reflection={data.reflection} />
             </motion.div>
           )
