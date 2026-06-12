@@ -8,34 +8,50 @@ interface WeightInputFormProps {
   onSaved: () => void;
 }
 
+function generateId(): string {
+  try {
+    return crypto.randomUUID();
+  } catch {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2);
+  }
+}
+
 export function WeightInputForm({ onSaved }: WeightInputFormProps) {
   const today = new Date().toISOString().split("T")[0];
   const [weight, setWeight] = useState("");
   const [date, setDate] = useState(today);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState(false);
   const [error, setError] = useState("");
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
+    if (busy || done) return;
 
-    const w = parseFloat(weight);
-    if (!weight.trim()) { setError("体重を入力してください"); return; }
+    setError("");
+    const raw = weight.trim();
+    const w = parseFloat(raw);
+
+    if (!raw) { setError("体重を入力してください"); return; }
     if (isNaN(w)) { setError("正しい体重を入力してください"); return; }
     if (w <= 0) { setError("体重は 0 kg より大きい値で入力してください"); return; }
     if (w >= 300) { setError("体重は 300 kg 未満で入力してください"); return; }
     if (!date) { setError("日付を入力してください"); return; }
 
-    setSaving(true);
+    setBusy(true);
     try {
       saveWeightRecord(w, date);
-      setSaved(true);
-      setTimeout(() => { setSaved(false); onSaved(); }, 900);
-    } catch {
+      setDone(true);
+      // show success for 900ms, then switch to graph tab
+      setTimeout(() => {
+        setDone(false);
+        setBusy(false);
+        onSaved();
+      }, 900);
+    } catch (err) {
+      console.error("weight save error:", err);
       setError("保存に失敗しました。もう一度お試しください。");
-    } finally {
-      setSaving(false);
+      setBusy(false);
     }
   }
 
@@ -96,22 +112,26 @@ export function WeightInputForm({ onSaved }: WeightInputFormProps) {
         <p className="text-[12px] font-medium" style={{ color: "#EF4444" }}>{error}</p>
       )}
 
-      {/* CTA button */}
+      {/* CTA */}
       <button
         type="submit"
-        disabled={saving || saved}
-        className="w-full flex items-center justify-center gap-2 font-bold text-[15px] text-white active:scale-[0.98] transition-transform duration-100 disabled:opacity-60"
+        disabled={busy || done}
+        className="w-full flex items-center justify-center gap-2 font-bold text-[15px] text-white active:scale-[0.98] transition-transform duration-100 disabled:opacity-70"
         style={{
           height: 52,
           borderRadius: 999,
-          background: "linear-gradient(135deg, #10B981 0%, #34D399 100%)",
+          background: done
+            ? "linear-gradient(135deg, #059669 0%, #10B981 100%)"
+            : "linear-gradient(135deg, #10B981 0%, #34D399 100%)",
           boxShadow: "0 12px 30px rgba(16,185,129,0.25)",
           touchAction: "manipulation",
+          border: "none",
+          cursor: busy || done ? "default" : "pointer",
         }}
       >
-        {saved ? (
+        {done ? (
           <><Check style={{ width: 18, height: 18 }} strokeWidth={2.5} /> 記録しました</>
-        ) : saving ? (
+        ) : busy ? (
           <Loader2 style={{ width: 18, height: 18 }} className="animate-spin" />
         ) : "決定"}
       </button>

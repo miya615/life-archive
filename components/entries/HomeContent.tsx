@@ -249,11 +249,11 @@ function HomeCards({ entries, reflection }: { entries: Entry[]; reflection: Refl
                 >
                   <Link
                     href={`/entries/${entry.id}`}
-                    className="overflow-hidden flex flex-col h-full active:scale-[0.98] active:opacity-90 transition-transform duration-100 block rounded-[20px]"
-                    style={{ minHeight: 160, touchAction: "manipulation", background: cs.bg, border: `1px solid ${cs.borderColor}`, boxShadow: "var(--card-shadow)" }}
+                    className="overflow-hidden flex flex-col active:scale-[0.98] active:opacity-90 transition-transform duration-100 block rounded-[20px]"
+                    style={{ touchAction: "manipulation", background: cs.bg, border: `1px solid ${cs.borderColor}`, boxShadow: "var(--card-shadow)" }}
                   >
                     {entry.image_url ? (
-                      <div className="relative overflow-hidden" style={{ height: 100 }}>
+                      <div className="relative overflow-hidden flex-shrink-0" style={{ height: 96 }}>
                         <img src={entry.image_url} alt="" className="w-full h-full object-cover"
                           style={{ opacity: 0.92 }} />
                         <div className="absolute inset-0 pointer-events-none"
@@ -265,21 +265,21 @@ function HomeCards({ entries, reflection }: { entries: Entry[]; reflection: Refl
                         </div>
                       </div>
                     ) : (
-                      <div className="flex items-center justify-center" style={{ height: 64, background: `${cs.accent}22` }}>
-                        <span className="text-3xl" style={{ opacity: 0.7 }}>
+                      <div className="flex items-center justify-center flex-shrink-0" style={{ height: 56, background: `${cs.accent}22` }}>
+                        <span className="text-2xl" style={{ opacity: 0.7 }}>
                           {CATEGORY_ICONS[entry.category]}
                         </span>
                       </div>
                     )}
 
-                    <div className="px-4 py-3 flex flex-col justify-between flex-1">
-                      <div className="flex items-center gap-1.5 mb-2">
-                        <span className="text-[12px] font-bold leading-none" style={{ color: cs.labelColor }}>
+                    <div className="px-3 pt-2.5 pb-3 flex flex-col gap-1.5">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[11px] font-bold leading-none" style={{ color: cs.labelColor }}>
                           {entry.category}
                         </span>
-                        <span className="text-[11px] text-muted ml-auto whitespace-nowrap">{formatDate(entry.entry_date)}</span>
+                        <span className="text-[10px] text-muted ml-auto whitespace-nowrap">{formatDate(entry.entry_date)}</span>
                       </div>
-                      <p className="text-[13px] font-bold text-primary leading-snug line-clamp-2">{entry.title}</p>
+                      <p className="text-[13px] font-bold text-primary leading-snug line-clamp-2 break-words">{entry.title}</p>
                     </div>
                   </Link>
                 </motion.div>
