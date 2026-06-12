@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Plus, ArrowRight, CalendarDays } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Entry, CATEGORY_ICONS } from "@/lib/types";
@@ -348,15 +348,19 @@ export function HomeContent() {
         />
       )}
 
-      {loading ? (
-        <HomeSkeleton />
-      ) : (
-        entries && data && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, delay: 0.2 }}>
-            <HomeCards entries={entries} reflection={data.reflection} />
+      <AnimatePresence mode="wait">
+        {loading ? (
+          <motion.div key="skeleton" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
+            <HomeSkeleton />
           </motion.div>
-        )
-      )}
+        ) : (
+          entries && data && (
+            <motion.div key="cards" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, delay: 0.2 }}>
+              <HomeCards entries={entries} reflection={data.reflection} />
+            </motion.div>
+          )
+        )}
+      </AnimatePresence>
     </main>
   );
 }
