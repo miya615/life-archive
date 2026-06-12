@@ -36,20 +36,24 @@ export function EntriesContent() {
   const [selectedCategory, setSelectedCategory] = useState<Category | "すべて">("すべて");
   const [catOpen, setCatOpen] = useState(false);
 
-  // ページ表示後にクライアントでデータ取得
   useEffect(() => {
-    const supabase = createClient();
-    (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data } = await supabase
-        .from("entries")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("entry_date", { ascending: false });
-      setEntries(data ?? []);
-      setLoading(false);
-    })();
+    let mounted = true;
+    async function load() {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) { if (mounted) { setEntries([]); } return; }
+        const { data } = await supabase
+          .from("entries").select("*")
+          .eq("user_id", user.id)
+          .order("entry_date", { ascending: false });
+        if (mounted) setEntries(data ?? []);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+    load();
+    return () => { mounted = false; };
   }, []);
 
   const filtered = useMemo(() => entries.filter((e) => {

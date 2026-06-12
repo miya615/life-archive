@@ -49,40 +49,49 @@ export function ProfileContent() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const supabase = createClient();
-    (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+    let mounted = true;
+    async function load() {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
 
-      const [
-        { data: profile },
-        { count: totalEntries },
-        { count: photoCount },
-        { data: categoryRows },
-      ] = await Promise.all([
-        supabase.from("profiles").select("*").eq("id", user.id).single(),
-        supabase.from("entries").select("*", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase.from("entries").select("*", { count: "exact", head: true }).eq("user_id", user.id).not("image_url", "is", null),
-        supabase.from("entries").select("category").eq("user_id", user.id),
-      ]);
+        const [
+          { data: profile },
+          { count: totalEntries },
+          { count: photoCount },
+          { data: categoryRows },
+        ] = await Promise.all([
+          supabase.from("profiles").select("*").eq("id", user.id).single(),
+          supabase.from("entries").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+          supabase.from("entries").select("*", { count: "exact", head: true }).eq("user_id", user.id).not("image_url", "is", null),
+          supabase.from("entries").select("category").eq("user_id", user.id),
+        ]);
 
-      const catMap: Record<string, number> = {};
-      for (const row of categoryRows ?? []) {
-        catMap[row.category] = (catMap[row.category] ?? 0) + 1;
+        if (!mounted) return;
+
+        const catMap: Record<string, number> = {};
+        for (const row of categoryRows ?? []) {
+          catMap[row.category] = (catMap[row.category] ?? 0) + 1;
+        }
+        const name = profile?.display_name ?? user.email?.split("@")[0] ?? "";
+        setDisplayName(name);
+        setData({
+          email: user.email ?? "",
+          displayName: name,
+          avatarUrl: profile?.avatar_url ?? null,
+          totalEntries: totalEntries ?? 0,
+          photoCount: photoCount ?? 0,
+          categoryStats: catMap,
+          memberSince: profile?.created_at ?? user.created_at,
+        });
+      } finally {
+        // ProfileContent は data が null のままスケルトンを表示するため
+        // loading state は不要。finally は将来の拡張用に空で残す。
       }
-
-      const name = profile?.display_name ?? user.email?.split("@")[0] ?? "";
-      setDisplayName(name);
-      setData({
-        email: user.email ?? "",
-        displayName: name,
-        avatarUrl: profile?.avatar_url ?? null,
-        totalEntries: totalEntries ?? 0,
-        photoCount: photoCount ?? 0,
-        categoryStats: catMap,
-        memberSince: profile?.created_at ?? user.created_at,
-      });
-    })();
+    }
+    load();
+    return () => { mounted = false; };
   }, []);
 
   async function handleSave() {
