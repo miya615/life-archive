@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Plus, ArrowRight } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import { type Entry, CATEGORY_ICONS } from "@/lib/types";
 
 const MONTHS_JP = ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"];
@@ -31,63 +29,17 @@ function groupByYearMonth(entries: Entry[]): Grouped {
   }));
 }
 
-function TimelineSkeleton() {
-  return (
-    <div className="space-y-10 animate-pulse">
-      {[0, 1].map((i) => (
-        <div key={i} className="space-y-4">
-          <div className="flex items-center gap-5">
-            <div className="w-16 h-16 rounded-3xl bg-slate-100 flex-shrink-0" />
-            <div className="flex-1 h-px bg-slate-100" />
-          </div>
-          <div className="ml-10 grid grid-cols-2 gap-3">
-            {[0, 1, 2, 3].map((j) => (
-              <div key={j} className="h-24 rounded-[20px] bg-slate-100" />
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-export function TimelineContent() {
-  const [entries, setEntries] = useState<Entry[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let mounted = true;
-    async function load() {
-      try {
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) { if (mounted) { setEntries([]); } return; }
-        const { data } = await supabase
-          .from("entries").select("*")
-          .eq("user_id", user.id)
-          .order("entry_date", { ascending: false });
-        if (mounted) setEntries(data ?? []);
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    }
-    load();
-    return () => { mounted = false; };
-  }, []);
-
+export function TimelineContent({ entries }: { entries: Entry[] }) {
   const grouped = groupByYearMonth(entries);
 
   return (
     <div className="space-y-6 lg:space-y-8">
-      {/* ヘッダーは即時表示 */}
       <div>
         <h1 className="text-2xl lg:text-3xl xl:text-4xl font-bold text-primary">人生年表</h1>
         <p className="text-sm text-muted mt-1">あなたの歩みを時系列で振り返る</p>
       </div>
 
-      {loading ? (
-        <TimelineSkeleton />
-      ) : grouped.length === 0 ? (
+      {grouped.length === 0 ? (
         <div className="glass p-16 text-center">
           <p className="text-5xl mb-4">✦</p>
           <p className="text-base text-muted mb-6">まだ記録がありません</p>
