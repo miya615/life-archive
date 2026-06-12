@@ -59,148 +59,110 @@ interface HomeData {
   reflection: ReflectionData;
 }
 
+/* ── サブコンポーネント ── */
 
-export function HomeContent() {
-  const [data, setData] = useState<HomeData | null>(null);
-
-  useEffect(() => {
-    let mounted = true;
-    async function load() {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null
-      if (!mounted) return null
-
-      const now = new Date();
-      const today = now.toISOString().split("T")[0];
-      function pad(n: number) { return String(n).padStart(2, "0"); }
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0];
-      const mm = pad(now.getMonth() + 1);
-      const dd = pad(now.getDate());
-      const thisYear = now.getFullYear();
-      const weekAgo = new Date(now);
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      const weekAgoStr = weekAgo.toISOString().split("T")[0];
-
-      const [
-        { data: recentEntries },
-        { count: monthCount },
-        { count: todayCount },
-        { data: profile },
-        { data: oneYearAgo },
-        { count: weekCount },
-        { data: weekEntries },
-      ] = await Promise.all([
-        supabase.from("entries").select("*").eq("user_id", user.id).order("entry_date", { ascending: false }).limit(10),
-        supabase.from("entries").select("*", { count: "exact", head: true }).eq("user_id", user.id).gte("entry_date", startOfMonth),
-        supabase.from("entries").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("entry_date", today),
-        supabase.from("profiles").select("*").eq("id", user.id).single(),
-        supabase.from("entries").select("*").eq("user_id", user.id).like("entry_date", `%-${mm}-${dd}`).neq("entry_date", `${thisYear}-${mm}-${dd}`).order("entry_date", { ascending: false }).limit(2),
-        supabase.from("entries").select("*", { count: "exact", head: true }).eq("user_id", user.id).gte("entry_date", weekAgoStr),
-        supabase.from("entries").select("category").eq("user_id", user.id).gte("entry_date", weekAgoStr),
-      ]);
-
-      if (!mounted) return;
-
-      const catMap: Record<string, number> = {};
-      for (const r of weekEntries ?? []) {
-        catMap[r.category] = (catMap[r.category] ?? 0) + 1;
-      }
-      const weekTopCategories = Object.entries(catMap)
-        .sort(([, a], [, b]) => b - a)
-        .slice(0, 3)
-        .map(([cat, count]) => ({ cat, count }));
-
-      setData({
-        entries: recentEntries ?? [],
-        monthCount: monthCount ?? 0,
-        todayCount: todayCount ?? 0,
-        displayName: profile?.display_name ?? user.email?.split("@")[0] ?? "",
-        reflection: {
-          oneYearAgo: oneYearAgo ?? [],
-          weekCount: weekCount ?? 0,
-          weekTopCategories,
-          quote: getDailyQuote(now),
-        },
-      });
-    }
-    load();
-    return () => { mounted = false; };
-  }, []);
-
-  if (!data) return null
-
-  const { entries, monthCount, todayCount, displayName, reflection } = data
-  if (!entries) return null;
+function HomeHeader() {
   const period = getPeriod();
-  const { greeting, message, heroGlow, btnText } = TIME_CONFIG[period];
+  const { greeting } = TIME_CONFIG[period];
+  return (
+    <div className="px-5 pt-6 pb-2">
+      <p className="text-[11px] text-muted font-medium tracking-wide">{todayFormatted()}</p>
+      <p className="text-[13px] text-muted mt-1">{greeting}</p>
+    </div>
+  );
+}
 
-  function narrativeStat() {
-    if (todayCount === 0) return "今日はまだ記録がありません";
-    return `今日、${todayCount}件の記憶を残しました`;
-  }
+function TodayHero({ displayName, todayCount, monthCount }: {
+  displayName: string;
+  todayCount: number;
+  monthCount: number;
+}) {
+  const period = getPeriod();
+  const { message, heroGlow, btnText } = TIME_CONFIG[period];
 
   return (
-    <div className="space-y-8 lg:space-y-10">
-
-      {/* ══ HERO ══ */}
-      <motion.div
-        initial={{ opacity: 0, y: -12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25, ease: "easeOut" }}
+    <motion.div
+      initial={{ opacity: 0, y: -12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="mx-4 mb-6"
+    >
+      <div
+        className="glass-strong relative overflow-hidden"
+        style={{
+          padding: "clamp(28px, 5vw, 52px)",
+          boxShadow: `0 20px 60px ${heroGlow}, 0 1px 0 rgba(255,255,255,0.07) inset`,
+        }}
       >
-        <div
-          className="glass-strong relative overflow-hidden"
-          style={{
-            padding: "clamp(28px, 5vw, 52px)",
-            boxShadow: `0 20px 60px ${heroGlow}, 0 1px 0 rgba(255,255,255,0.07) inset`,
-          }}
-        >
-          <div className="absolute pointer-events-none" style={{
-            top: "-20%", right: "-10%", width: "55%", height: "180%",
-            background: `radial-gradient(ellipse, ${heroGlow} 0%, transparent 68%)`,
-          }} />
+        <div className="absolute pointer-events-none" style={{
+          top: "-20%", right: "-10%", width: "55%", height: "180%",
+          background: `radial-gradient(ellipse, ${heroGlow} 0%, transparent 68%)`,
+        }} />
 
-          <div className="relative">
-            <p className="text-[12px] text-muted font-medium mb-6 tracking-wide">{todayFormatted()}</p>
-            <p className="text-[13px] text-muted mb-1">{greeting}、</p>
-            <h1 className="font-bold text-primary leading-tight mb-4"
-              style={{ fontSize: "clamp(28px, 5vw, 46px)" }}>
-              {displayName}さん
-            </h1>
-            <p className="text-[15px] lg:text-[17px] text-secondary leading-relaxed mb-8 max-w-lg"
-              style={{ lineHeight: "1.75" }}>
-              {message}
-            </p>
+        <div className="relative">
+          <h1 className="font-bold text-primary leading-tight mb-4"
+            style={{ fontSize: "clamp(28px, 5vw, 46px)" }}>
+            {displayName}さん
+          </h1>
+          <p className="text-[15px] lg:text-[17px] text-secondary leading-relaxed mb-8 max-w-lg"
+            style={{ lineHeight: "1.75" }}>
+            {message}
+          </p>
 
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <Link
-                href="/entries/new"
-                className="inline-flex items-center gap-2.5 rounded-2xl text-white font-semibold active:scale-[0.96] active:opacity-90 transition-transform duration-100"
-                style={{
-                  background: "linear-gradient(135deg, var(--accent), var(--accent-dark))",
-                  boxShadow: "0 6px 28px var(--accent-glow)",
-                  padding: "14px 28px",
-                  fontSize: "15px",
-                  touchAction: "manipulation",
-                  userSelect: "none",
-                  WebkitUserSelect: "none",
-                }}
-              >
-                <Plus style={{ width: 17, height: 17 }} strokeWidth={2.5} />
-                {btnText}
-              </Link>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <Link
+              href="/entries/new"
+              className="inline-flex items-center gap-2.5 rounded-2xl text-white font-semibold active:scale-[0.96] active:opacity-90 transition-transform duration-100"
+              style={{
+                background: "linear-gradient(135deg, var(--accent), var(--accent-dark))",
+                boxShadow: "0 6px 28px var(--accent-glow)",
+                padding: "14px 28px",
+                fontSize: "15px",
+                touchAction: "manipulation",
+                userSelect: "none",
+                WebkitUserSelect: "none",
+              }}
+            >
+              <Plus style={{ width: 17, height: 17 }} strokeWidth={2.5} />
+              {btnText}
+            </Link>
 
-              <div className="flex flex-col gap-0.5">
-                <p className="text-[13px] text-secondary">{narrativeStat()}</p>
-                <p className="text-[11px] text-muted">今月、合計 {monthCount}件の記録があります</p>
-              </div>
+            <div className="flex flex-col gap-0.5">
+              <p className="text-[13px] text-secondary">
+                {todayCount === 0 ? "今日はまだ記録がありません" : `今日、${todayCount}件の記憶を残しました`}
+              </p>
+              <p className="text-[11px] text-muted">今月、合計 {monthCount}件の記録があります</p>
             </div>
           </div>
         </div>
-      </motion.div>
+      </div>
+    </motion.div>
+  );
+}
 
-      {/* ══ RECENT ENTRIES ══ */}
+function HomeSkeleton() {
+  return (
+    <div className="space-y-6 px-4 animate-pulse">
+      <div className="glass-strong rounded-[24px]" style={{ height: 260 }} />
+      <div className="space-y-4">
+        <div className="h-5 w-32 rounded-full bg-slate-100" />
+        <div className="grid grid-cols-2 gap-3">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="rounded-[20px] bg-slate-100" style={{ height: 160 }} />
+          ))}
+        </div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="rounded-[20px] bg-slate-100" style={{ height: 100 }} />
+        <div className="rounded-[20px] bg-slate-100" style={{ height: 100 }} />
+      </div>
+    </div>
+  );
+}
+
+function HomeCards({ entries, reflection }: { entries: Entry[]; reflection: ReflectionData }) {
+  return (
+    <div className="space-y-8 px-4">
       <div>
         <div className="flex items-center justify-between mb-5">
           <div>
@@ -293,9 +255,104 @@ export function HomeContent() {
         )}
       </div>
 
-      {/* ══ REFLECTIONS ══ */}
       <HomeReflections data={reflection} />
-
     </div>
+  );
+}
+
+/* ── メインコンポーネント ── */
+
+export function HomeContent() {
+  const [data, setData] = useState<HomeData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return null
+        if (!mounted) return null
+
+        const now = new Date();
+        const today = now.toISOString().split("T")[0];
+        function pad(n: number) { return String(n).padStart(2, "0"); }
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0];
+        const mm = pad(now.getMonth() + 1);
+        const dd = pad(now.getDate());
+        const thisYear = now.getFullYear();
+        const weekAgo = new Date(now);
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        const weekAgoStr = weekAgo.toISOString().split("T")[0];
+
+        const [
+          { data: recentEntries },
+          { count: monthCount },
+          { count: todayCount },
+          { data: profile },
+          { data: oneYearAgo },
+          { count: weekCount },
+          { data: weekEntries },
+        ] = await Promise.all([
+          supabase.from("entries").select("*").eq("user_id", user.id).order("entry_date", { ascending: false }).limit(10),
+          supabase.from("entries").select("*", { count: "exact", head: true }).eq("user_id", user.id).gte("entry_date", startOfMonth),
+          supabase.from("entries").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("entry_date", today),
+          supabase.from("profiles").select("*").eq("id", user.id).single(),
+          supabase.from("entries").select("*").eq("user_id", user.id).like("entry_date", `%-${mm}-${dd}`).neq("entry_date", `${thisYear}-${mm}-${dd}`).order("entry_date", { ascending: false }).limit(2),
+          supabase.from("entries").select("*", { count: "exact", head: true }).eq("user_id", user.id).gte("entry_date", weekAgoStr),
+          supabase.from("entries").select("category").eq("user_id", user.id).gte("entry_date", weekAgoStr),
+        ]);
+
+        if (!mounted) return;
+
+        const catMap: Record<string, number> = {};
+        for (const r of weekEntries ?? []) {
+          catMap[r.category] = (catMap[r.category] ?? 0) + 1;
+        }
+        const weekTopCategories = Object.entries(catMap)
+          .sort(([, a], [, b]) => b - a)
+          .slice(0, 3)
+          .map(([cat, count]) => ({ cat, count }));
+
+        setData({
+          entries: recentEntries ?? [],
+          monthCount: monthCount ?? 0,
+          todayCount: todayCount ?? 0,
+          displayName: profile?.display_name ?? user.email?.split("@")[0] ?? "",
+          reflection: {
+            oneYearAgo: oneYearAgo ?? [],
+            weekCount: weekCount ?? 0,
+            weekTopCategories,
+            quote: getDailyQuote(now),
+          },
+        });
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+    load();
+    return () => { mounted = false; };
+  }, []);
+
+  const entries = data?.entries ?? null;
+
+  return (
+    <main className="min-h-dvh">
+      <HomeHeader />
+      {data && (
+        <TodayHero
+          displayName={data.displayName}
+          todayCount={data.todayCount}
+          monthCount={data.monthCount}
+        />
+      )}
+
+      {loading ? (
+        <HomeSkeleton />
+      ) : (
+        entries && data && <HomeCards entries={entries} reflection={data.reflection} />
+      )}
+    </main>
   );
 }
