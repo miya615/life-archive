@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Plus, ArrowRight, CalendarDays } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Entry, CATEGORY_ICONS } from "@/lib/types";
@@ -95,10 +95,15 @@ function TodayHero({ displayName, todayCount, monthCount }: {
         }} />
 
         <div className="relative">
-          <h1 className="font-bold text-primary leading-tight mb-4"
-            style={{ fontSize: "clamp(28px, 5vw, 46px)" }}>
-            {displayName}さん
-          </h1>
+          {displayName && (
+            <h1 className="font-bold text-primary leading-tight mb-4"
+              style={{ fontSize: "clamp(28px, 5vw, 46px)" }}>
+              {displayName}さん
+            </h1>
+          )}
+          {!displayName && (
+            <div className="h-10 w-40 rounded-2xl bg-slate-100 animate-pulse mb-4" />
+          )}
           <p className="text-[15px] lg:text-[17px] text-secondary leading-relaxed mb-8 max-w-lg"
             style={{ lineHeight: "1.75" }}>
             {message}
@@ -137,15 +142,12 @@ function TodayHero({ displayName, todayCount, monthCount }: {
 
 function HomeSkeleton() {
   return (
-    <div className="space-y-6 px-4 animate-pulse">
-      <div className="glass-strong rounded-[24px]" style={{ height: 260 }} />
-      <div className="space-y-4">
-        <div className="h-5 w-32 rounded-full bg-slate-100" />
-        <div className="grid grid-cols-2 gap-3">
-          {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="rounded-[20px] bg-slate-100" style={{ height: 160 }} />
-          ))}
-        </div>
+    <div className="space-y-4 px-4 animate-pulse">
+      <div className="h-5 w-32 rounded-full bg-slate-100" />
+      <div className="grid grid-cols-2 gap-3">
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="rounded-[20px] bg-slate-100" style={{ height: 160 }} />
+        ))}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="rounded-[20px] bg-slate-100" style={{ height: 100 }} />
@@ -174,8 +176,7 @@ function HomeCards({ entries, reflection }: { entries: Entry[]; reflection: Refl
         </div>
 
         {entries.length === 0 ? (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className="glass p-14 text-center">
+          <div className="glass p-14 text-center">
             <div className="w-14 h-14 rounded-3xl mx-auto mb-5 flex items-center justify-center"
               style={{ background: "var(--glass-strong-bg)" }}>
               <CalendarDays style={{ width: 24, height: 24, color: "var(--accent)" }} strokeWidth={1.5} />
@@ -189,7 +190,7 @@ function HomeCards({ entries, reflection }: { entries: Entry[]; reflection: Refl
             >
               <Plus style={{ width: 14, height: 14 }} /> 最初の記録を書く
             </Link>
-          </motion.div>
+          </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
             {entries.slice(0, 6).map((entry, i) => (
@@ -267,8 +268,7 @@ export function HomeContent() {
       try {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return null
-        if (!mounted) return null
+        if (!user || !mounted) return;
 
         const now = new Date();
         const today = now.toISOString().split("T")[0];
@@ -290,10 +290,10 @@ export function HomeContent() {
           { count: weekCount },
           { data: weekEntries },
         ] = await Promise.all([
-          supabase.from("entries").select("*").eq("user_id", user.id).order("entry_date", { ascending: false }).limit(10),
+          supabase.from("entries").select("*").eq("user_id", user.id).order("entry_date", { ascending: false }).limit(8),
           supabase.from("entries").select("*", { count: "exact", head: true }).eq("user_id", user.id).gte("entry_date", startOfMonth),
           supabase.from("entries").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("entry_date", today),
-          supabase.from("profiles").select("*").eq("id", user.id).single(),
+          supabase.from("profiles").select("display_name").eq("id", user.id).single(),
           supabase.from("entries").select("*").eq("user_id", user.id).like("entry_date", `%-${mm}-${dd}`).neq("entry_date", `${thisYear}-${mm}-${dd}`).order("entry_date", { ascending: false }).limit(2),
           supabase.from("entries").select("*", { count: "exact", head: true }).eq("user_id", user.id).gte("entry_date", weekAgoStr),
           supabase.from("entries").select("category").eq("user_id", user.id).gte("entry_date", weekAgoStr),
@@ -330,30 +330,19 @@ export function HomeContent() {
     return () => { mounted = false; };
   }, []);
 
-  const entries = data?.entries ?? null
-
   return (
     <main className="min-h-dvh">
       <HomeHeader />
-
-      <AnimatePresence mode="wait">
-        {loading ? (
-          <motion.div key="skeleton" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
-            <HomeSkeleton />
-          </motion.div>
-        ) : (
-          entries && data && (
-            <motion.div key="content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
-              <TodayHero
-                displayName={data.displayName}
-                todayCount={data.todayCount}
-                monthCount={data.monthCount}
-              />
-              <HomeCards entries={entries} reflection={data.reflection} />
-            </motion.div>
-          )
-        )}
-      </AnimatePresence>
+      <TodayHero
+        displayName={data?.displayName ?? ""}
+        todayCount={data?.todayCount ?? 0}
+        monthCount={data?.monthCount ?? 0}
+      />
+      {loading ? (
+        <HomeSkeleton />
+      ) : (
+        data && <HomeCards entries={data.entries} reflection={data.reflection} />
+      )}
     </main>
   );
 }
