@@ -238,51 +238,68 @@ function HomeCards({ entries, reflection }: { entries: Entry[]; reflection: Refl
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 items-start">
             {entries.slice(0, 6).map((entry, i) => {
               const cs = CARD_STYLES[entry.category] ?? CARD_STYLES["日常"];
+              const hasImage = Boolean(entry.image_url);
               return (
                 <motion.div key={entry.id}
                   initial={{ opacity: 0, y: 14 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: Math.min(i * 0.02, 0.10), duration: 0.14, ease: "easeOut" }}
-                  className="overflow-hidden rounded-[20px] active:scale-[0.98] active:opacity-90 transition-transform duration-100"
-                  style={{ background: cs.bg, border: `1px solid ${cs.borderColor}`, boxShadow: "var(--card-shadow)", touchAction: "manipulation" }}
+                  className="overflow-hidden rounded-[20px] active:scale-[0.98] active:opacity-90 transition-transform duration-100 flex flex-col"
+                  style={{
+                    background: cs.bg,
+                    border: `1px solid ${cs.borderColor}`,
+                    boxShadow: "var(--card-shadow)",
+                    touchAction: "manipulation",
+                    minHeight: hasImage ? 260 : undefined,
+                  }}
                 >
                   <Link
                     href={`/entries/${entry.id}`}
-                    className="flex flex-col"
+                    className="flex flex-col flex-1"
                     style={{ touchAction: "manipulation" }}
                   >
-                    {entry.image_url ? (
-                      <div className="relative overflow-hidden flex-shrink-0" style={{ height: 96 }}>
-                        <img src={entry.image_url} alt="" className="w-full h-full object-cover"
-                          style={{ opacity: 0.92 }} />
-                        <div className="absolute inset-0 pointer-events-none"
-                          style={{ background: "linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.45))" }} />
-                        <div className="absolute bottom-2 left-3 pointer-events-none">
-                          <span className="text-white text-[10px] font-semibold opacity-90">
+                    {hasImage ? (
+                      /* ── 写真ありカード ── */
+                      <>
+                        <div className="w-full shrink-0 overflow-hidden" style={{ height: 150 }}>
+                          <img
+                            src={entry.image_url!}
+                            alt=""
+                            className="h-full w-full object-cover object-center"
+                          />
+                        </div>
+                        <div className="relative z-10 flex shrink-0 flex-col gap-1.5 px-4 pt-3 pb-5">
+                          <div className="flex min-w-0 items-center gap-1.5">
+                            <span className="shrink-0 text-[11px] font-bold leading-tight" style={{ color: cs.labelColor }}>
+                              {entry.category}
+                            </span>
+                            <span className="min-w-0 truncate text-[10px] leading-tight text-slate-400 ml-auto">{formatDate(entry.entry_date)}</span>
+                          </div>
+                          <p className="block w-full min-w-0 overflow-hidden break-words text-[13px] font-bold leading-snug line-clamp-2" style={{ color: "#0F172A" }}>{entry.title}</p>
+                        </div>
+                      </>
+                    ) : (
+                      /* ── 写真なしカード ── */
+                      <>
+                        <div className="flex items-center justify-center shrink-0" style={{ height: 56, background: `${cs.accent}22` }}>
+                          <span className="text-2xl" style={{ opacity: 0.7 }}>
                             {CATEGORY_ICONS[entry.category]}
                           </span>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center flex-shrink-0" style={{ height: 56, background: `${cs.accent}22` }}>
-                        <span className="text-2xl" style={{ opacity: 0.7 }}>
-                          {CATEGORY_ICONS[entry.category]}
-                        </span>
-                      </div>
+                        <div className="flex shrink-0 flex-col gap-2 px-4 pt-3 pb-5">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <span className="text-[11px] font-bold leading-none flex-shrink-0" style={{ color: cs.labelColor }}>
+                              {entry.category}
+                            </span>
+                            <span className="text-[10px] text-muted ml-auto whitespace-nowrap flex-shrink-0">{formatDate(entry.entry_date)}</span>
+                          </div>
+                          <p className="block w-full min-w-0 overflow-hidden break-words text-[13px] font-bold leading-snug line-clamp-2 text-primary">{entry.title}</p>
+                        </div>
+                      </>
                     )}
-
-                    <div className="px-4 pt-3 pb-4 flex flex-col gap-2">
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="text-[11px] font-bold leading-none flex-shrink-0" style={{ color: cs.labelColor }}>
-                          {entry.category}
-                        </span>
-                        <span className="text-[10px] text-muted ml-auto whitespace-nowrap flex-shrink-0">{formatDate(entry.entry_date)}</span>
-                      </div>
-                      <p className="text-[13px] font-bold text-primary leading-snug line-clamp-2 break-words min-w-0">{entry.title}</p>
-                    </div>
                   </Link>
                 </motion.div>
               );
