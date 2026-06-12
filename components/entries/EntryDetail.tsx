@@ -65,7 +65,7 @@ export function EntryDetail({ entry }: { entry: Entry }) {
 
       {/* Content */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}
-        className="glass-strong p-6 lg:p-8 space-y-5"
+        className="glass-strong p-6 lg:p-8"
         style={{ boxShadow: "var(--card-shadow)" }}
       >
         {/* Meta */}
@@ -78,23 +78,12 @@ export function EntryDetail({ entry }: { entry: Entry }) {
         </div>
 
         {/* Title */}
-        <h1 className="text-xl lg:text-2xl font-bold text-primary leading-snug">{entry.title}</h1>
-
-        {/* Divider */}
-        <div className="h-px" style={{ background: "var(--glass-border)" }} />
+        <h1 className="text-xl lg:text-2xl font-bold text-primary leading-snug mt-4">{entry.title}</h1>
 
         {/* Content */}
         {entry.content && (
-          <p className="text-sm lg:text-base text-secondary leading-relaxed whitespace-pre-wrap">{entry.content}</p>
+          <p className="text-sm lg:text-base text-secondary whitespace-pre-wrap mt-6" style={{ lineHeight: "1.85" }}>{entry.content}</p>
         )}
-
-        {/* Timestamps */}
-        <div className="pt-2" style={{ borderTop: "1px solid var(--glass-border)" }}>
-          <p className="text-[10px] text-muted">
-            作成: {new Date(entry.created_at).toLocaleDateString("ja-JP")}
-            {entry.updated_at !== entry.created_at && <> ・ 更新: {new Date(entry.updated_at).toLocaleDateString("ja-JP")}</>}
-          </p>
-        </div>
       </motion.div>
 
       {/* Delete modal */}
