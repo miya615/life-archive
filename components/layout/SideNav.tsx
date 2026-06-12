@@ -98,7 +98,7 @@ export function SideNav() {
 
   return (
     <aside
-      className="glass-sidebar hidden lg:flex flex-col flex-shrink-0 h-screen sticky top-0 z-40 overflow-y-auto"
+      className="glass-sidebar flex flex-col flex-shrink-0 h-screen sticky top-0 z-40 overflow-y-auto"
       style={{ width: 220 }}
     >
       {/* Logo */}

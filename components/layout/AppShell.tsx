@@ -12,7 +12,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         Do NOT use h-screen or h-dvh — those create fixed-height containers that block scroll.
       */}
       <div className="relative z-10 flex" style={{ minHeight: "100svh" }}>
-        <SideNav />
+        <div className="hidden lg:block">
+          <SideNav />
+        </div>
         {/*
           pb-scroll-safe on mobile covers BottomNav + safe-area + generous breathing room.
           Defined in globals.css as calc(220px + env(safe-area-inset-bottom, 0px)).
