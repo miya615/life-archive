@@ -1,10 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Plus, ArrowRight, CalendarDays } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 import { Entry, CATEGORY_ICONS } from "@/lib/types";
-import { formatDate, CAT_GRADIENTS } from "@/lib/utils";
+import { formatDate, CAT_GRADIENTS, getDailyQuote } from "@/lib/utils";
 import type { ReflectionData } from "@/lib/utils";
 import { HomeReflections } from "./HomeReflections";
 
@@ -49,7 +51,7 @@ const TIME_CONFIG: Record<Period, {
   },
 };
 
-interface Props {
+interface HomeData {
   entries: Entry[];
   monthCount: number;
   todayCount: number;
@@ -57,7 +59,96 @@ interface Props {
   reflection: ReflectionData;
 }
 
-export function HomeContent({ entries, monthCount, todayCount, displayName, reflection }: Props) {
+function HomeSkeleton() {
+  return (
+    <div className="space-y-8 lg:space-y-10 animate-pulse">
+      <div className="glass-strong rounded-[24px]" style={{ height: 260 }} />
+      <div className="space-y-4">
+        <div className="h-5 w-32 rounded-full bg-slate-100" />
+        <div className="grid grid-cols-2 gap-3">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="rounded-[20px] bg-slate-100" style={{ height: 160 }} />
+          ))}
+        </div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="rounded-[20px] bg-slate-100" style={{ height: 100 }} />
+        <div className="rounded-[20px] bg-slate-100" style={{ height: 100 }} />
+      </div>
+    </div>
+  );
+}
+
+export function HomeContent() {
+  const [data, setData] = useState<HomeData | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || !mounted) return;
+
+      const now = new Date();
+      const today = now.toISOString().split("T")[0];
+      function pad(n: number) { return String(n).padStart(2, "0"); }
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0];
+      const mm = pad(now.getMonth() + 1);
+      const dd = pad(now.getDate());
+      const thisYear = now.getFullYear();
+      const weekAgo = new Date(now);
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      const weekAgoStr = weekAgo.toISOString().split("T")[0];
+
+      const [
+        { data: recentEntries },
+        { count: monthCount },
+        { count: todayCount },
+        { data: profile },
+        { data: oneYearAgo },
+        { count: weekCount },
+        { data: weekEntries },
+      ] = await Promise.all([
+        supabase.from("entries").select("*").eq("user_id", user.id).order("entry_date", { ascending: false }).limit(10),
+        supabase.from("entries").select("*", { count: "exact", head: true }).eq("user_id", user.id).gte("entry_date", startOfMonth),
+        supabase.from("entries").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("entry_date", today),
+        supabase.from("profiles").select("*").eq("id", user.id).single(),
+        supabase.from("entries").select("*").eq("user_id", user.id).like("entry_date", `%-${mm}-${dd}`).neq("entry_date", `${thisYear}-${mm}-${dd}`).order("entry_date", { ascending: false }).limit(2),
+        supabase.from("entries").select("*", { count: "exact", head: true }).eq("user_id", user.id).gte("entry_date", weekAgoStr),
+        supabase.from("entries").select("category").eq("user_id", user.id).gte("entry_date", weekAgoStr),
+      ]);
+
+      if (!mounted) return;
+
+      const catMap: Record<string, number> = {};
+      for (const r of weekEntries ?? []) {
+        catMap[r.category] = (catMap[r.category] ?? 0) + 1;
+      }
+      const weekTopCategories = Object.entries(catMap)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 3)
+        .map(([cat, count]) => ({ cat, count }));
+
+      setData({
+        entries: recentEntries ?? [],
+        monthCount: monthCount ?? 0,
+        todayCount: todayCount ?? 0,
+        displayName: profile?.display_name ?? user.email?.split("@")[0] ?? "",
+        reflection: {
+          oneYearAgo: oneYearAgo ?? [],
+          weekCount: weekCount ?? 0,
+          weekTopCategories,
+          quote: getDailyQuote(now),
+        },
+      });
+    }
+    load();
+    return () => { mounted = false; };
+  }, []);
+
+  if (!data) return <HomeSkeleton />;
+
+  const { entries, monthCount, todayCount, displayName, reflection } = data;
   const period = getPeriod();
   const { greeting, message, heroGlow, btnText } = TIME_CONFIG[period];
 
@@ -165,7 +256,7 @@ export function HomeContent({ entries, monthCount, todayCount, displayName, refl
               <motion.div key={entry.id}
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.14, ease: "easeOut" }}
+                transition={{ delay: Math.min(i * 0.02, 0.10), duration: 0.14, ease: "easeOut" }}
               >
                 <Link
                   href={`/entries/${entry.id}`}
