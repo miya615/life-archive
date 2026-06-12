@@ -246,12 +246,12 @@ function HomeCards({ entries, reflection }: { entries: Entry[]; reflection: Refl
                   initial={{ opacity: 0, y: 14 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: Math.min(i * 0.02, 0.10), duration: 0.14, ease: "easeOut" }}
-                  className="overflow-hidden rounded-[20px]"
-                  style={{ background: cs.bg, border: `1px solid ${cs.borderColor}`, boxShadow: "var(--card-shadow)" }}
+                  className="overflow-hidden rounded-[20px] active:scale-[0.98] active:opacity-90 transition-transform duration-100"
+                  style={{ background: cs.bg, border: `1px solid ${cs.borderColor}`, boxShadow: "var(--card-shadow)", touchAction: "manipulation" }}
                 >
                   <Link
                     href={`/entries/${entry.id}`}
-                    className="flex flex-col h-full active:scale-[0.98] active:opacity-90 transition-transform duration-100 block"
+                    className="flex flex-col"
                     style={{ touchAction: "manipulation" }}
                   >
                     {entry.image_url ? (
