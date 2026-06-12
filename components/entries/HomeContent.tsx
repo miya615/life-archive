@@ -246,11 +246,13 @@ function HomeCards({ entries, reflection }: { entries: Entry[]; reflection: Refl
                   initial={{ opacity: 0, y: 14 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: Math.min(i * 0.02, 0.10), duration: 0.14, ease: "easeOut" }}
+                  className="overflow-hidden rounded-[20px]"
+                  style={{ background: cs.bg, border: `1px solid ${cs.borderColor}`, boxShadow: "var(--card-shadow)" }}
                 >
                   <Link
                     href={`/entries/${entry.id}`}
-                    className="overflow-hidden flex flex-col active:scale-[0.98] active:opacity-90 transition-transform duration-100 block rounded-[20px]"
-                    style={{ touchAction: "manipulation", background: cs.bg, border: `1px solid ${cs.borderColor}`, boxShadow: "var(--card-shadow)" }}
+                    className="flex flex-col h-full active:scale-[0.98] active:opacity-90 transition-transform duration-100 block"
+                    style={{ touchAction: "manipulation" }}
                   >
                     {entry.image_url ? (
                       <div className="relative overflow-hidden flex-shrink-0" style={{ height: 96 }}>
@@ -273,13 +275,13 @@ function HomeCards({ entries, reflection }: { entries: Entry[]; reflection: Refl
                     )}
 
                     <div className="px-4 pt-3 pb-4 flex flex-col gap-2">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[11px] font-bold leading-none" style={{ color: cs.labelColor }}>
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="text-[11px] font-bold leading-none flex-shrink-0" style={{ color: cs.labelColor }}>
                           {entry.category}
                         </span>
-                        <span className="text-[10px] text-muted ml-auto whitespace-nowrap">{formatDate(entry.entry_date)}</span>
+                        <span className="text-[10px] text-muted ml-auto whitespace-nowrap flex-shrink-0">{formatDate(entry.entry_date)}</span>
                       </div>
-                      <p className="text-[13px] font-bold text-primary leading-snug line-clamp-2 break-words">{entry.title}</p>
+                      <p className="text-[13px] font-bold text-primary leading-snug line-clamp-2 break-words min-w-0">{entry.title}</p>
                     </div>
                   </Link>
                 </motion.div>
