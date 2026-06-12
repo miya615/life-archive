@@ -59,25 +59,6 @@ interface HomeData {
   reflection: ReflectionData;
 }
 
-function HomeSkeleton() {
-  return (
-    <div className="space-y-8 lg:space-y-10 animate-pulse">
-      <div className="glass-strong rounded-[24px]" style={{ height: 260 }} />
-      <div className="space-y-4">
-        <div className="h-5 w-32 rounded-full bg-slate-100" />
-        <div className="grid grid-cols-2 gap-3">
-          {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="rounded-[20px] bg-slate-100" style={{ height: 160 }} />
-          ))}
-        </div>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="rounded-[20px] bg-slate-100" style={{ height: 100 }} />
-        <div className="rounded-[20px] bg-slate-100" style={{ height: 100 }} />
-      </div>
-    </div>
-  );
-}
 
 export function HomeContent() {
   const [data, setData] = useState<HomeData | null>(null);
@@ -146,7 +127,7 @@ export function HomeContent() {
     return () => { mounted = false; };
   }, []);
 
-  if (!data) return <HomeSkeleton />;
+  if (!data) return null
 
   const { entries, monthCount, todayCount, displayName, reflection } = data;
   const period = getPeriod();
