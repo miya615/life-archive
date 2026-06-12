@@ -176,7 +176,7 @@ export function BottomNav() {
               href={item.href}
               prefetch
               onClick={() => setPendingHref(item.href)}
-              className="flex flex-col items-center justify-center gap-1 py-2.5 min-h-[56px] active:scale-[0.88] transition-transform duration-100"
+              className="flex flex-col items-center justify-center gap-1 py-2.5 min-h-[56px] transition-transform duration-100 active:scale-95"
               style={{ touchAction: "manipulation" }}
             >
               <Icon
