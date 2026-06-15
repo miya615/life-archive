@@ -10,6 +10,7 @@ import { formatDate } from "@/lib/utils";
 import type { ReflectionData } from "@/lib/utils";
 import { HomeReflections } from "./HomeReflections";
 import { WeightCard } from "@/components/weight/WeightCard";
+import { MemoCard } from "@/components/memo/MemoCard";
 
 function todayFormatted() {
   return new Date().toLocaleDateString("ja-JP", {
@@ -203,8 +204,11 @@ function HomeSkeleton() {
 function HomeCards({ entries, reflection }: { entries: Entry[]; reflection: ReflectionData }) {
   return (
     <div className="space-y-8 px-4">
-      {/* 体重カード */}
-      <WeightCard />
+      {/* 体重カード + メモカード */}
+      <div className="grid grid-cols-2 gap-3">
+        <WeightCard />
+        <MemoCard />
+      </div>
 
       <div>
         <div className="mb-4 text-center">
