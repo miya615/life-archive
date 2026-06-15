@@ -123,7 +123,7 @@ function TodayHero({ displayName, todayCount, monthCount, theme }: {
   theme: TimeTheme;
 }) {
   return (
-    <div className="mx-4 mb-6">
+    <div className="mx-4 mb-4">
       <div
         className="relative overflow-hidden"
         style={{
@@ -203,7 +203,7 @@ function HomeSkeleton() {
 
 function HomeCards({ entries, reflection }: { entries: Entry[]; reflection: ReflectionData }) {
   return (
-    <div className="space-y-8 px-4">
+    <div className="space-y-5 px-4">
       {/* 体重カード + メモカード */}
       <div className="grid grid-cols-2 gap-3">
         <WeightCard />

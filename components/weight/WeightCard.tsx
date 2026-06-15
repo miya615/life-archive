@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Scale } from "lucide-react";
+import { Scale, Plus } from "lucide-react";
 import { getWeightRecords, getLatestRecord, fmtDate, type WeightRecord } from "@/lib/weight";
 import { WeightModal } from "./WeightModal";
 
@@ -29,28 +29,28 @@ export function WeightCard() {
         }}
         onClick={() => setModalOpen(true)}
       >
-        <div className="p-5">
+        <div className="p-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2">
               <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
                 style={{ background: "rgba(16,185,129,0.13)" }}
               >
-                <Scale style={{ width: 18, height: 18, color: "#10B981" }} strokeWidth={1.8} />
+                <Scale style={{ width: 16, height: 16, color: "#10B981" }} strokeWidth={1.8} />
               </div>
               <span className="text-[13px] font-bold" style={{ color: "#065F46" }}>体重</span>
             </div>
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setModalOpen(true); }}
-              className="text-[11px] font-semibold px-3 py-1.5 rounded-full active:opacity-70 transition-opacity duration-100"
-              style={{ background: "#10B981", color: "#fff", touchAction: "manipulation" }}
+              className="w-7 h-7 flex items-center justify-center rounded-full active:opacity-70 transition-opacity duration-100"
+              style={{ background: "#10B981", touchAction: "manipulation" }}
             >
-              体重を記録
+              <Plus style={{ width: 14, height: 14, color: "#fff" }} strokeWidth={2.5} />
             </button>
           </div>
 
-          <div className="mt-4">
+          <div className="mt-3">
             {latest ? (
               <>
                 <div className="flex items-baseline gap-1">
