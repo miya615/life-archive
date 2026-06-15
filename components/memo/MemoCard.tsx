@@ -39,14 +39,14 @@ export function MemoCard() {
 
   return (
     <div
-      className="rounded-[20px] overflow-hidden flex flex-col h-full"
+      className="rounded-[20px] overflow-hidden flex flex-col"
       style={{
         background: "linear-gradient(135deg, #FFF7ED 0%, #EEF2FF 100%)",
         border: "1px solid rgba(249,115,22,0.16)",
         boxShadow: "0 4px 20px rgba(249,115,22,0.08)",
       }}
     >
-      <div className="p-4 flex flex-col gap-2.5 flex-1 min-h-0">
+      <div className="p-4 flex flex-col gap-2.5 h-full">
         {/* header */}
         <div className="flex items-center gap-2">
           <div

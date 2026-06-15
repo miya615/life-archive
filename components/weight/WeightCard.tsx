@@ -19,7 +19,7 @@ export function WeightCard() {
   return (
     <>
       <div
-        className="rounded-[20px] overflow-hidden active:scale-[0.99] transition-transform duration-100 h-full flex flex-col"
+        className="rounded-[20px] overflow-hidden active:scale-[0.99] transition-transform duration-100"
         style={{
           background: "linear-gradient(135deg, #ECFDF5 0%, #E0F2FE 100%)",
           border: "1px solid rgba(16,185,129,0.18)",
@@ -29,7 +29,7 @@ export function WeightCard() {
         }}
         onClick={() => setModalOpen(true)}
       >
-        <div className="p-4 flex flex-col flex-1">
+        <div className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div

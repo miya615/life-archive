@@ -125,10 +125,9 @@ function TodayHero({ displayName, todayCount, monthCount, theme }: {
   return (
     <div className="mx-4 mb-4">
       <div
-        className="relative overflow-hidden flex flex-col justify-between"
+        className="relative overflow-hidden"
         style={{
-          padding: "clamp(20px, 4vw, 52px)",
-          minHeight: "clamp(0px, 44svh, 9999px)",
+          padding: "clamp(28px, 5vw, 52px)",
           background: theme.background,
           borderRadius: 28,
           border: "1px solid rgba(255,255,255,0.5)",
@@ -140,31 +139,29 @@ function TodayHero({ displayName, todayCount, monthCount, theme }: {
         {/* inner top highlight */}
         <div className="absolute pointer-events-none inset-x-0 top-0 h-px" style={{ background: "rgba(255,255,255,0.6)" }} />
 
-        <div className="relative flex flex-col justify-between h-full gap-5">
-          <div>
-            {displayName ? (
-              <h1 className="font-bold leading-tight mb-2"
-                style={{ fontSize: "clamp(22px, 5vw, 46px)", color: theme.textColor }}>
-                {displayName}さん
-              </h1>
-            ) : (
-              <div className="h-8 w-36 rounded-2xl animate-pulse mb-2"
-                style={{ background: theme.isNight ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.07)" }} />
-            )}
-            <p className="text-[14px] lg:text-[17px] max-w-lg"
-              style={{ lineHeight: "1.65", color: theme.subTextColor }}>
-              {theme.message}
-            </p>
-          </div>
+        <div className="relative">
+          {displayName ? (
+            <h1 className="font-bold leading-tight mb-4"
+              style={{ fontSize: "clamp(28px, 5vw, 46px)", color: theme.textColor }}>
+              {displayName}さん
+            </h1>
+          ) : (
+            <div className="h-10 w-40 rounded-2xl animate-pulse mb-4"
+              style={{ background: theme.isNight ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.07)" }} />
+          )}
+          <p className="text-[15px] lg:text-[17px] leading-relaxed mb-8 max-w-lg"
+            style={{ lineHeight: "1.75", color: theme.subTextColor }}>
+            {theme.message}
+          </p>
 
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <Link
               href="/entries/new"
               className="inline-flex items-center gap-2.5 rounded-2xl font-semibold active:scale-[0.96] active:opacity-90 transition-transform duration-100"
               style={{
                 background: theme.ctaBackground,
                 boxShadow: `0 6px 24px ${theme.isNight ? "rgba(245,158,11,0.35)" : `${theme.accentColor}44`}`,
-                padding: "12px 24px",
+                padding: "14px 28px",
                 fontSize: "15px",
                 color: "#ffffff",
                 touchAction: "manipulation",
@@ -177,7 +174,7 @@ function TodayHero({ displayName, todayCount, monthCount, theme }: {
             </Link>
 
             <div className="flex flex-col gap-0.5">
-              <p className="text-[12px]" style={{ color: theme.subTextColor }}>
+              <p className="text-[13px]" style={{ color: theme.subTextColor }}>
                 {todayCount === 0 ? "今日はまだ記録がありません" : `今日、${todayCount}件の記憶を残しました`}
               </p>
               <p className="text-[11px]" style={{ color: theme.isNight ? "rgba(203,213,225,0.7)" : "rgba(100,116,139,0.8)" }}>
@@ -208,7 +205,7 @@ function HomeCards({ entries, reflection }: { entries: Entry[]; reflection: Refl
   return (
     <div className="space-y-5 px-4">
       {/* 体重カード + メモカード */}
-      <div className="grid grid-cols-2 gap-3 items-stretch" style={{ minHeight: "clamp(0px, 42svh, 9999px)" }}>
+      <div className="grid grid-cols-2 gap-3">
         <WeightCard />
         <MemoCard />
       </div>
