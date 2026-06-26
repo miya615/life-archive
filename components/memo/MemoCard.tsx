@@ -41,9 +41,9 @@ export function MemoCard() {
     <div
       className="rounded-[20px] overflow-hidden flex flex-col"
       style={{
-        background: "linear-gradient(135deg, #FFF7ED 0%, #EEF2FF 100%)",
-        border: "1px solid rgba(249,115,22,0.16)",
-        boxShadow: "0 4px 20px rgba(249,115,22,0.08)",
+        background: "linear-gradient(135deg, #FFFCF7 0%, #FFF8EE 100%)",
+        border: "1px solid rgba(210, 175, 120, 0.22)",
+        boxShadow: "0 4px 20px rgba(180, 130, 70, 0.08)",
       }}
     >
       <div className="p-4 flex flex-col gap-2.5 h-full">
@@ -51,11 +51,11 @@ export function MemoCard() {
         <div className="flex items-center gap-2">
           <div
             className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-            style={{ background: "rgba(249,115,22,0.12)" }}
+            style={{ background: "rgba(210, 160, 80, 0.12)" }}
           >
-            <NotebookPen style={{ width: 15, height: 15, color: "#F97316" }} strokeWidth={1.8} />
+            <NotebookPen style={{ width: 15, height: 15, color: "#B07D30" }} strokeWidth={1.8} />
           </div>
-          <p className="text-[13px] font-bold leading-none" style={{ color: "#7C2D12" }}>メモ</p>
+          <p className="text-[13px] font-bold leading-none" style={{ color: "#6B4F30" }}>メモ</p>
         </div>
 
         {/* textarea */}
@@ -67,7 +67,7 @@ export function MemoCard() {
           className="w-full resize-none rounded-2xl text-[13px] leading-relaxed outline-none flex-1"
           style={{
             background: "rgba(255,255,255,0.70)",
-            border: "1px solid rgba(249,115,22,0.15)",
+            border: "1px solid rgba(210, 175, 120, 0.18)",
             padding: "8px 10px",
             color: "#1E293B",
             minHeight: 64,
@@ -83,11 +83,11 @@ export function MemoCard() {
           style={{
             background: saved
               ? "linear-gradient(135deg, #059669 0%, #10B981 100%)"
-              : "linear-gradient(135deg, #F97316 0%, #FB923C 100%)",
+              : "linear-gradient(135deg, #C8853A 0%, #D4944A 100%)",
             color: "#fff",
             boxShadow: saved
               ? "0 4px 14px rgba(16,185,129,0.22)"
-              : "0 4px 14px rgba(249,115,22,0.22)",
+              : "0 4px 14px rgba(180, 120, 50, 0.22)",
             touchAction: "manipulation",
           }}
         >

@@ -21,9 +21,9 @@ export function WeightCard() {
       <div
         className="rounded-[20px] overflow-hidden active:scale-[0.99] transition-transform duration-100"
         style={{
-          background: "linear-gradient(135deg, #ECFDF5 0%, #E0F2FE 100%)",
-          border: "1px solid rgba(16,185,129,0.18)",
-          boxShadow: "0 4px 20px rgba(16,185,129,0.10)",
+          background: "linear-gradient(135deg, #F0FDF8 0%, #ECFDF5 100%)",
+          border: "1px solid rgba(16,185,129,0.14)",
+          boxShadow: "0 4px 20px rgba(16,185,129,0.08)",
           touchAction: "manipulation",
           cursor: "pointer",
         }}

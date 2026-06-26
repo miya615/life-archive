@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Plus, ArrowRight, CalendarDays } from "lucide-react";
+import { ArrowRight, CalendarDays, PenLine, Camera, Activity, Leaf } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Entry, CATEGORY_ICONS, CARD_STYLES } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
@@ -11,6 +11,7 @@ import type { ReflectionData } from "@/lib/utils";
 import { HomeReflections } from "./HomeReflections";
 import { WeightCard } from "@/components/weight/WeightCard";
 import { MemoCard } from "@/components/memo/MemoCard";
+import { WeightModal } from "@/components/weight/WeightModal";
 
 function todayFormatted() {
   return new Date().toLocaleDateString("ja-JP", {
@@ -18,74 +19,77 @@ function todayFormatted() {
   });
 }
 
+function todayKey() {
+  return new Date().toISOString().split("T")[0];
+}
+
 type Period = "morning" | "noon" | "evening" | "night";
 
 interface TimeTheme {
   greeting: string;
+  emoji: string;
   message: string;
-  btnText: string;
   background: string;
+  border: string;
+  shadow: string;
   textColor: string;
   subTextColor: string;
-  accentColor: string;
-  ctaBackground: string;
-  glow: string;
-  /** decorative radial highlight position & color */
-  glowOrb: string;
+  statBg: string;
+  statColor: string;
   isNight: boolean;
 }
 
 const TIME_THEMES: Record<Period, TimeTheme> = {
   morning: {
     greeting: "おはようございます",
+    emoji: "☀️",
     message: "今朝の気持ちや決意を、未来の自分への手紙として残しておきましょう。",
-    btnText: "今日を記録する",
-    background: "linear-gradient(135deg, #FFF7E6 0%, #EAF6FF 55%, #FFF1C7 100%)",
-    textColor: "#0F172A",
-    subTextColor: "#64748B",
-    accentColor: "#F59E0B",
-    ctaBackground: "linear-gradient(135deg, #F59E0B 0%, #F97316 100%)",
-    glow: "0 20px 60px rgba(245,158,11,0.20)",
-    glowOrb: "radial-gradient(ellipse 55% 180% at 90% -10%, rgba(251,191,36,0.22) 0%, transparent 70%)",
+    background: "linear-gradient(135deg, #FFFBF0 0%, #FEF6E4 60%, #FFFAF2 100%)",
+    border: "rgba(217, 180, 130, 0.28)",
+    shadow: "0 8px 32px rgba(217, 150, 80, 0.12)",
+    textColor: "#2C1A0E",
+    subTextColor: "#8A6A4A",
+    statBg: "rgba(217, 150, 80, 0.12)",
+    statColor: "#7A5A30",
     isNight: false,
   },
   noon: {
     greeting: "こんにちは",
+    emoji: "🌤",
     message: "今の気持ちや出来事を、数年後の自分が読み返せるように残しましょう。",
-    btnText: "今を記録",
-    background: "linear-gradient(135deg, #FFFFFF 0%, #EEF7FF 45%, #FFE8B8 100%)",
-    textColor: "#0F172A",
-    subTextColor: "#64748B",
-    accentColor: "#F97316",
-    ctaBackground: "linear-gradient(135deg, #F97316 0%, #FB923C 100%)",
-    glow: "0 20px 60px rgba(249,115,22,0.18)",
-    glowOrb: "radial-gradient(ellipse 55% 180% at 90% -10%, rgba(249,115,22,0.18) 0%, transparent 70%)",
+    background: "linear-gradient(135deg, #F8FCFF 0%, #EEF6FF 60%, #F5FAFF 100%)",
+    border: "rgba(147, 197, 253, 0.30)",
+    shadow: "0 8px 32px rgba(100, 160, 240, 0.10)",
+    textColor: "#0F2040",
+    subTextColor: "#4A6080",
+    statBg: "rgba(100, 160, 240, 0.10)",
+    statColor: "#3060A0",
     isNight: false,
   },
   evening: {
     greeting: "おつかれさまです",
+    emoji: "🌇",
     message: "何気ない1日も、未来の自分には大切な記録です。今日を静かに残しましょう。",
-    btnText: "今日を残す",
-    background: "linear-gradient(135deg, #FFF0D9 0%, #FDBA74 50%, #E9D5FF 100%)",
-    textColor: "#111827",
-    subTextColor: "#6B7280",
-    accentColor: "#EA580C",
-    ctaBackground: "linear-gradient(135deg, #EA580C 0%, #F97316 100%)",
-    glow: "0 24px 70px rgba(234,88,12,0.25)",
-    glowOrb: "radial-gradient(ellipse 55% 180% at 88% -5%, rgba(253,186,116,0.35) 0%, transparent 68%)",
+    background: "linear-gradient(135deg, #FFF6F0 0%, #FEF0E4 60%, #FFF8F5 100%)",
+    border: "rgba(253, 186, 116, 0.32)",
+    shadow: "0 8px 32px rgba(234, 100, 50, 0.10)",
+    textColor: "#2C1408",
+    subTextColor: "#8A5030",
+    statBg: "rgba(234, 100, 50, 0.10)",
+    statColor: "#8A4020",
     isNight: false,
   },
   night: {
     greeting: "おかえり",
+    emoji: "🌙",
     message: "一日の終わりに、今日の記憶を静かに残しましょう。眠る前のほんの数分で。",
-    btnText: "今日の記憶を残す",
-    background: "linear-gradient(135deg, #0F172A 0%, #312E81 55%, #1E1B4B 100%)",
-    textColor: "#F8FAFC",
-    subTextColor: "#CBD5E1",
-    accentColor: "#A78BFA",
-    ctaBackground: "linear-gradient(135deg, #F59E0B 0%, #FDBA74 100%)",
-    glow: "0 24px 80px rgba(167,139,250,0.25)",
-    glowOrb: "radial-gradient(ellipse 55% 180% at 88% -5%, rgba(167,139,250,0.28) 0%, transparent 68%)",
+    background: "linear-gradient(135deg, #1E1B3A 0%, #2D2860 50%, #1A1730 100%)",
+    border: "rgba(139, 92, 246, 0.22)",
+    shadow: "0 8px 32px rgba(100, 80, 200, 0.22)",
+    textColor: "#EDE9FE",
+    subTextColor: "#C4B5FD",
+    statBg: "rgba(139, 92, 246, 0.15)",
+    statColor: "#C4B5FD",
     isNight: true,
   },
 };
@@ -97,6 +101,25 @@ function getTimeTheme(hour: number): TimeTheme {
   return TIME_THEMES.night;
 }
 
+const MOODS = ["😊", "😌", "😤", "😢", "🤔", "🔥", "😴", "🥳"];
+const MOOD_LS_KEY = "daily_mood_v1";
+
+function loadMood(): string {
+  if (typeof window === "undefined") return "";
+  try {
+    const raw = localStorage.getItem(MOOD_LS_KEY);
+    if (!raw) return "";
+    const parsed = JSON.parse(raw) as { mood: string; date: string };
+    return parsed.date === todayKey() ? parsed.mood : "";
+  } catch { return ""; }
+}
+
+function saveMood(mood: string) {
+  try {
+    localStorage.setItem(MOOD_LS_KEY, JSON.stringify({ mood, date: todayKey() }));
+  } catch { /* noop */ }
+}
+
 interface HomeData {
   entries: Entry[];
   monthCount: number;
@@ -105,107 +128,235 @@ interface HomeData {
   reflection: ReflectionData;
 }
 
-/* ── サブコンポーネント ── */
-
-function HomeHeader({ theme }: { theme: TimeTheme }) {
-  return (
-    <div className="px-5 pt-6 pb-2">
-      <p className="text-[11px] text-muted font-medium tracking-wide">{todayFormatted()}</p>
-      <p className="text-[13px] text-muted mt-1">{theme.greeting}</p>
-    </div>
-  );
-}
-
-function TodayHero({ displayName, todayCount, monthCount, theme }: {
+/* ── GreetingCard ── */
+function GreetingCard({ theme, displayName, todayCount, monthCount }: {
+  theme: TimeTheme;
   displayName: string;
   todayCount: number;
   monthCount: number;
-  theme: TimeTheme;
 }) {
   return (
     <div className="mx-4 mb-4">
       <div
         className="relative overflow-hidden"
         style={{
-          padding: "clamp(28px, 5vw, 52px)",
+          padding: "clamp(22px, 5vw, 38px)",
           background: theme.background,
           borderRadius: 28,
-          border: "1px solid rgba(255,255,255,0.5)",
-          boxShadow: theme.glow,
+          border: `1px solid ${theme.border}`,
+          boxShadow: theme.shadow,
         }}
       >
-        {/* decorative glow orb */}
-        <div className="absolute pointer-events-none inset-0" style={{ background: theme.glowOrb }} />
-        {/* inner top highlight */}
-        <div className="absolute pointer-events-none inset-x-0 top-0 h-px" style={{ background: "rgba(255,255,255,0.6)" }} />
+        <p className="text-[11px] font-medium tracking-wide mb-3" style={{ color: theme.subTextColor }}>
+          {todayFormatted()}
+        </p>
 
-        <div className="relative">
-          {displayName ? (
-            <h1 className="font-bold leading-tight mb-4"
-              style={{ fontSize: "clamp(28px, 5vw, 46px)", color: theme.textColor }}>
-              {displayName}さん
-            </h1>
-          ) : (
-            <div className="h-10 w-40 rounded-2xl animate-pulse mb-4"
-              style={{ background: theme.isNight ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.07)" }} />
-          )}
-          <p className="text-[15px] lg:text-[17px] leading-relaxed mb-8 max-w-lg"
-            style={{ lineHeight: "1.75", color: theme.subTextColor }}>
-            {theme.message}
-          </p>
+        <h1
+          className="font-bold leading-tight mb-2"
+          style={{ fontSize: "clamp(20px, 5vw, 30px)", color: theme.textColor }}
+        >
+          {theme.greeting}
+          {displayName ? `、${displayName}さん` : ""} {theme.emoji}
+        </h1>
 
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <Link
-              href="/entries/new"
-              className="inline-flex items-center gap-2.5 rounded-2xl font-semibold active:scale-[0.96] active:opacity-90 transition-transform duration-100"
-              style={{
-                background: theme.ctaBackground,
-                boxShadow: `0 6px 24px ${theme.isNight ? "rgba(245,158,11,0.35)" : `${theme.accentColor}44`}`,
-                padding: "14px 28px",
-                fontSize: "15px",
-                color: "#ffffff",
-                touchAction: "manipulation",
-                userSelect: "none",
-                WebkitUserSelect: "none",
-              }}
-            >
-              <Plus style={{ width: 17, height: 17 }} strokeWidth={2.5} />
-              {theme.btnText}
-            </Link>
+        <p className="text-[13px] leading-relaxed mb-5 max-w-sm" style={{ color: theme.subTextColor }}>
+          {theme.message}
+        </p>
 
-            <div className="flex flex-col gap-0.5">
-              <p className="text-[13px]" style={{ color: theme.subTextColor }}>
-                {todayCount === 0 ? "今日はまだ記録がありません" : `今日、${todayCount}件の記憶を残しました`}
-              </p>
-              <p className="text-[11px]" style={{ color: theme.isNight ? "rgba(203,213,225,0.7)" : "rgba(100,116,139,0.8)" }}>
-                今月、合計 {monthCount}件の記録があります
-              </p>
-            </div>
-          </div>
+        <div className="flex flex-wrap gap-2">
+          <span
+            className="text-[12px] font-semibold px-3 py-1.5 rounded-full"
+            style={{ background: theme.statBg, color: theme.statColor }}
+          >
+            {todayCount === 0 ? "今日はまだ記録なし" : `今日 ${todayCount}件`}
+          </span>
+          <span
+            className="text-[12px] font-semibold px-3 py-1.5 rounded-full"
+            style={{ background: theme.statBg, color: theme.statColor }}
+          >
+            今月 {monthCount}件
+          </span>
         </div>
       </div>
     </div>
   );
 }
 
-function HomeSkeleton() {
+/* ── MoodCard ── */
+function MoodCard() {
+  const [selected, setSelected] = useState<string>("");
+
+  useEffect(() => {
+    setSelected(loadMood());
+  }, []);
+
+  function handleSelect(mood: string) {
+    const next = selected === mood ? "" : mood;
+    setSelected(next);
+    if (next) {
+      saveMood(next);
+    } else {
+      try { localStorage.removeItem(MOOD_LS_KEY); } catch { /* noop */ }
+    }
+  }
+
   return (
-    <div className="space-y-4 px-4 animate-pulse">
-      <div className="h-5 w-32 rounded-full bg-slate-100" />
-      <div className="grid grid-cols-2 gap-3">
-        {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="rounded-[20px] bg-slate-100" style={{ height: 160 }} />
+    <div
+      className="mx-4 mb-4 px-4 py-4"
+      style={{
+        background: "#FFFCF7",
+        borderRadius: 24,
+        border: "1px solid rgba(210, 185, 155, 0.22)",
+        boxShadow: "0 4px 20px rgba(180, 140, 80, 0.07)",
+      }}
+    >
+      <p className="text-[12px] font-semibold mb-3" style={{ color: "#8A7060" }}>
+        いまの気分は？
+      </p>
+      <div className="flex gap-2 flex-wrap">
+        {MOODS.map((m) => (
+          <button
+            key={m}
+            type="button"
+            onClick={() => handleSelect(m)}
+            className="transition-transform duration-100 active:scale-90"
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 12,
+              fontSize: 22,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: selected === m ? "rgba(217, 150, 80, 0.15)" : "rgba(0,0,0,0.03)",
+              border: selected === m ? "2px solid rgba(217, 150, 80, 0.50)" : "2px solid transparent",
+              cursor: "pointer",
+              touchAction: "manipulation",
+            }}
+          >
+            {m}
+          </button>
         ))}
       </div>
     </div>
   );
 }
 
+/* ── QuickActions ── */
+function QuickActions() {
+  const [weightOpen, setWeightOpen] = useState(false);
+
+  const actions: Array<{
+    icon: ReactNode;
+    label: string;
+    color: string;
+    bg: string;
+    iconBg: string;
+    href?: string;
+    onClick?: () => void;
+  }> = [
+    {
+      icon: <PenLine style={{ width: 20, height: 20 }} strokeWidth={1.8} />,
+      label: "メモを書く",
+      color: "#D97706",
+      bg: "rgba(217, 119, 6, 0.08)",
+      iconBg: "rgba(217, 119, 6, 0.14)",
+      onClick: () => {
+        document.getElementById("cards-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      },
+    },
+    {
+      icon: <Camera style={{ width: 20, height: 20 }} strokeWidth={1.8} />,
+      label: "写真を残す",
+      color: "#2563EB",
+      bg: "rgba(37, 99, 235, 0.07)",
+      iconBg: "rgba(37, 99, 235, 0.12)",
+      href: "/entries/new",
+    },
+    {
+      icon: <Activity style={{ width: 20, height: 20 }} strokeWidth={1.8} />,
+      label: "体調を記録",
+      color: "#059669",
+      bg: "rgba(5, 150, 105, 0.07)",
+      iconBg: "rgba(5, 150, 105, 0.12)",
+      onClick: () => setWeightOpen(true),
+    },
+    {
+      icon: <Leaf style={{ width: 20, height: 20 }} strokeWidth={1.8} />,
+      label: "健康を記録",
+      color: "#9333EA",
+      bg: "rgba(147, 51, 234, 0.07)",
+      iconBg: "rgba(147, 51, 234, 0.10)",
+      href: "/entries/new",
+    },
+  ];
+
+  return (
+    <div className="mx-4 mb-5">
+      <p className="text-[12px] font-semibold mb-3" style={{ color: "#8A7060" }}>クイック記録</p>
+      <div className="grid grid-cols-2 gap-2.5">
+        {actions.map((a) => {
+          const inner = (
+            <div
+              className="flex flex-col gap-2.5 p-3.5 rounded-[18px] active:scale-[0.97] transition-transform duration-100"
+              style={{
+                background: a.bg,
+                border: "1px solid rgba(0,0,0,0.05)",
+                touchAction: "manipulation",
+              }}
+            >
+              <div
+                className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: a.iconBg, color: a.color }}
+              >
+                {a.icon}
+              </div>
+              <span className="text-[13px] font-semibold" style={{ color: "#2C1A0E" }}>{a.label}</span>
+            </div>
+          );
+
+          if (a.href) {
+            return (
+              <Link key={a.label} href={a.href} style={{ display: "block" }}>
+                {inner}
+              </Link>
+            );
+          }
+          return (
+            <button key={a.label} type="button" onClick={a.onClick} className="text-left block w-full">
+              {inner}
+            </button>
+          );
+        })}
+      </div>
+      <WeightModal
+        open={weightOpen}
+        onClose={() => setWeightOpen(false)}
+        onSaved={() => setWeightOpen(false)}
+      />
+    </div>
+  );
+}
+
+/* ── HomeSkeleton ── */
+function HomeSkeleton() {
+  return (
+    <div className="space-y-4 px-4 animate-pulse">
+      <div className="h-5 w-32 rounded-full bg-stone-100" />
+      <div className="grid grid-cols-2 gap-3">
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="rounded-[20px] bg-stone-100" style={{ height: 160 }} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── HomeCards ── */
 function HomeCards({ entries, reflection }: { entries: Entry[]; reflection: ReflectionData }) {
   return (
     <div className="space-y-5 px-4">
-      {/* 体重カード + メモカード */}
-      <div className="grid grid-cols-2 gap-3">
+      <div id="cards-section" className="grid grid-cols-2 gap-3">
         <WeightCard />
         <MemoCard />
       </div>
@@ -236,9 +387,13 @@ function HomeCards({ entries, reflection }: { entries: Entry[]; reflection: Refl
             <Link
               href="/entries/new"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-white font-semibold text-[14px] active:scale-[0.97] active:opacity-90 transition-transform duration-100"
-              style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-dark))", boxShadow: "0 4px 20px var(--accent-glow)", touchAction: "manipulation" }}
+              style={{
+                background: "linear-gradient(135deg, var(--accent), var(--accent-dark))",
+                boxShadow: "0 4px 20px var(--accent-glow)",
+                touchAction: "manipulation",
+              }}
             >
-              <Plus style={{ width: 14, height: 14 }} /> 最初の記録を書く
+              ✏️ 最初の記録を書く
             </Link>
           </div>
         ) : (
@@ -265,7 +420,6 @@ function HomeCards({ entries, reflection }: { entries: Entry[]; reflection: Refl
                     className="flex flex-col h-full"
                     style={{ touchAction: "manipulation" }}
                   >
-                    {/* ── 画像 or アイコンエリア（共通 h-[112px]）── */}
                     {hasImage ? (
                       <div className="w-full shrink-0 overflow-hidden" style={{ height: 112 }}>
                         <img
@@ -281,16 +435,18 @@ function HomeCards({ entries, reflection }: { entries: Entry[]; reflection: Refl
                         </span>
                       </div>
                     )}
-
-                    {/* ── テキストエリア（共通）── */}
                     <div className="flex min-h-0 flex-1 flex-col justify-start gap-1 px-3.5 pt-2.5 pb-3 overflow-hidden">
                       <div className="flex min-w-0 items-center gap-1">
                         <span className="shrink-0 text-[13px] font-bold leading-tight" style={{ color: cs.labelColor }}>
                           {entry.category}
                         </span>
-                        <span className="min-w-0 truncate text-[10px] leading-tight text-slate-400 ml-auto">{formatDate(entry.entry_date)}</span>
+                        <span className="min-w-0 truncate text-[10px] leading-tight text-slate-400 ml-auto">
+                          {formatDate(entry.entry_date)}
+                        </span>
                       </div>
-                      <p className="block min-w-0 overflow-hidden break-words text-[13px] font-bold leading-snug line-clamp-2" style={{ color: "#0F172A" }}>{entry.title}</p>
+                      <p className="block min-w-0 overflow-hidden break-words text-[13px] font-bold leading-snug line-clamp-2" style={{ color: "#0F172A" }}>
+                        {entry.title}
+                      </p>
                     </div>
                   </Link>
                 </motion.div>
@@ -305,8 +461,7 @@ function HomeCards({ entries, reflection }: { entries: Entry[]; reflection: Refl
   );
 }
 
-/* ── メインコンポーネント ── */
-
+/* ── HomeContent (main) ── */
 export function HomeContent() {
   const [data, setData] = useState<HomeData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -357,9 +512,7 @@ export function HomeContent() {
           monthCount: monthCount ?? 0,
           todayCount: todayCount ?? 0,
           displayName: profile?.display_name ?? user.email?.split("@")[0] ?? "",
-          reflection: {
-            oneYearAgo: oneYearAgo ?? [],
-          },
+          reflection: { oneYearAgo: oneYearAgo ?? [] },
         });
       } finally {
         if (mounted) setLoading(false);
@@ -370,14 +523,15 @@ export function HomeContent() {
   }, []);
 
   return (
-    <main className="min-h-dvh">
-      <HomeHeader theme={t} />
-      <TodayHero
+    <main>
+      <GreetingCard
+        theme={t}
         displayName={data?.displayName ?? ""}
         todayCount={data?.todayCount ?? 0}
         monthCount={data?.monthCount ?? 0}
-        theme={t}
       />
+      <MoodCard />
+      <QuickActions />
       {loading ? (
         <HomeSkeleton />
       ) : (
